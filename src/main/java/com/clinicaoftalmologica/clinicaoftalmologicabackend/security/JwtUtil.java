@@ -25,15 +25,10 @@ public class JwtUtil {
 
     private final long expirationTime = 86400000;
 
-    /**
-     * Genera un token JWT para el usuario autenticado.
-     *
-     * @param usuario El usuario para el que se genera el token.
-     * @return Un token JWT en formato String.
-     */
     public String generateToken(Usuario usuario) {
         return Jwts.builder()
                 .setSubject(usuario.getEmail())
+                .claim("id", usuario.getId())
                 .claim("username", usuario.getUsername())
                 .claim("nombre", usuario.getNombre())
                 .claim("apellido", usuario.getApellido())

@@ -55,4 +55,14 @@ public class EmpleadoController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/doctores")
+    public ResponseEntity<?> getDoctores() {
+        try {
+            List<Empleado> doctores = empleadoService.getDoctores();
+            return ResponseEntity.ok(doctores);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

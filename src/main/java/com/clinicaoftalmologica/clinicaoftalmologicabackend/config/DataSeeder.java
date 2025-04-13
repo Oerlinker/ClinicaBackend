@@ -10,14 +10,13 @@ import org.springframework.context.annotation.Configuration;
 public class DataSeeder {
 
     @Bean
-    CommandLineRunner initRoles(RolRepository rolRepository) {
+    CommandLineRunner initRoles(RolRepository rolRepository){
         return args -> {
             String[] roles = {"ADMIN", "DOCTOR", "PACIENTE", "EMPLEADO"};
-
-            for (String roleName : roles) {
-                if (rolRepository.findByNombre(roleName).isEmpty()) {
+            for(String roleName : roles){
+                if(rolRepository.findByNombre(roleName).isEmpty()){
                     rolRepository.save(new Rol(roleName));
-                    System.out.println("Rol creado" + roleName);
+                    System.out.println("Rol creado: " + roleName);
                 }
             }
         };

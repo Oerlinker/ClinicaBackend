@@ -1,0 +1,77 @@
+package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name="cita")
+public class Cita {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private LocalDate fecha;
+
+    @Column(nullable = false)
+    private LocalDateTime hora;
+
+    @Column(nullable = false)
+    private String estado;
+
+    @Column
+    private String tipo;
+
+    @ManyToOne
+    @JoinColumn(name = "paciente_id", nullable = true)
+    private Usuario paciente;
+
+    @ManyToOne
+    @JoinColumn(name = "empleado_id", nullable = false)
+    private Empleado doctor;
+
+    //getters and setters
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public LocalDate getFecha() {
+        return fecha;
+    }
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+    public LocalDateTime getHora() {
+        return hora;
+    }
+    public void setHora(LocalDateTime hora) {
+        this.hora = hora;
+    }
+    public String getEstado() {
+        return estado;
+    }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+    public String getTipo() {
+        return tipo;
+    }
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    public Usuario getPaciente() {
+        return paciente;
+    }
+    public void setPaciente(Usuario paciente) {
+        this.paciente = paciente;
+    }
+    public Empleado getDoctor() {
+        return doctor;
+    }
+    public void setDoctor(Empleado doctor) {
+        this.doctor = doctor;
+    }
+}
