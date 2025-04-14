@@ -127,4 +127,12 @@ public class CitaController {
     public ResponseEntity<List<Cita>> getCitas() {
         return ResponseEntity.ok(citaService.getAllCitas());
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PACIENTE')")
+    @GetMapping("/usuario/{userId}")
+    public ResponseEntity<List<Cita>> getCitasByUsuario(@PathVariable Long userId) {
+        logger.info("Solicitando citas para el usuario con ID: {}", userId);
+        List<Cita> citas = citaService.getCitasByPacienteId(userId);
+        return ResponseEntity.ok(citas);
+    }
 }

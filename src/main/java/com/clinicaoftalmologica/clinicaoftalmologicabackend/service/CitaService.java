@@ -74,4 +74,9 @@ public class CitaService {
     public List<Cita> getAllCitas() {
         return citaRepository.findAll();
     }
+    
+    public List<Cita> getCitasByPacienteId(Long pacienteId) {
+        logger.info("Buscando citas para el paciente con ID: {}", pacienteId);
+        return citaRepository.findByPacienteId(pacienteId);
+    }
 }

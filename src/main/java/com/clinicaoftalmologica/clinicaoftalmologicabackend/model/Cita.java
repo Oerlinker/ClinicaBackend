@@ -31,7 +31,7 @@ public class Cita {
     @JoinColumn(name = "empleado_id", nullable = false)
     private Empleado doctor;
 
-    //getters and setters
+
     public Long getId() {
         return id;
     }
