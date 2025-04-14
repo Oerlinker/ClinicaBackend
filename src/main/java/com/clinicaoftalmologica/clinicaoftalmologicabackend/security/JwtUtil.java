@@ -6,6 +6,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -15,14 +17,15 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final Dotenv dotenv = Dotenv.load();
+    @Value("${JWT_SECRET}")
+    private String secret;
 
+    private Key key;
 
-    private final String secret = dotenv.get("JWT_SECRET");
-
-
-    private final Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
+    @PostConstruct
+    public void init() {
+        key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
     private final long expirationTime = 86400000;
 
     public String generateToken(Usuario usuario) {
