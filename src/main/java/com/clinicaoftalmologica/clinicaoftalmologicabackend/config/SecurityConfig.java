@@ -20,7 +20,7 @@ public class SecurityConfig {
 
     @Autowired
     private JWTAuthenticationFilter jwtAuthenticationFilter;
-
+    //hicimos un cambio para ver cual es el error del usuario anonymousUser
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
