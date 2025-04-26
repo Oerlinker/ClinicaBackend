@@ -20,7 +20,7 @@ public class UsuarioService {
     @Autowired
     private RolRepository rolRepository;
 
-    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @Loggable("REGISTRAR_USUARIO")
     public Usuario registrarUsuario(Usuario usuario) throws Exception {
