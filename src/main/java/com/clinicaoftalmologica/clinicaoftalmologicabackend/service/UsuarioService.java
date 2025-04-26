@@ -61,7 +61,6 @@ public class UsuarioService {
         return username;
     }
 
-    @Loggable("LOGIN_USUARIO")
     public Usuario loginUsuario(String email, String password) throws Exception {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         if (usuarioOpt.isPresent()) {
