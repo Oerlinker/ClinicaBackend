@@ -28,7 +28,7 @@ public class CitaController {
     @Autowired
     private CitaService citaService;
 
-    // @PreAuthorize("hasAnyAuthority('ADMIN', 'PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PACIENTE')")
     @PostMapping
     public ResponseEntity<?> createCita(@RequestBody Map<String, Object> data) {
         try {

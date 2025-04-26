@@ -1,0 +1,55 @@
+package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
+
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Payment;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.PaymentRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.CitaService;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/payments")
+public class WebhookController {
+
+    private final PaymentRepository paymentRepo;
+    private final CitaService       citaService;
+    @Value("${stripe.webhookSecret}") private String endpointSecret;
+
+    public WebhookController(PaymentRepository paymentRepo,
+                             CitaService citaService) {
+        this.paymentRepo  = paymentRepo;
+        this.citaService  = citaService;
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<String> handleWebhook(
+            @RequestHeader("Stripe-Signature") String sigHeader,
+            @RequestBody String payload) {
+
+        try {
+            Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
+
+            if ("payment_intent.succeeded".equals(event.getType())) {
+                PaymentIntent intent = (PaymentIntent) event.getDataObjectDeserializer()
+                        .getObject().orElseThrow();
+                paymentRepo.findByPaymentIntentId(intent.getId())
+                        .ifPresent(p -> {
+                            p.setStatus(intent.getStatus());
+                            paymentRepo.save(p);
+                            try {
+                                citaService.markCitaPagada(p.getCita().getId());
+                            } catch (Exception ignored) {}
+                        });
+            }
+
+            return ResponseEntity.ok("");
+        } catch (SignatureVerificationException e) {
+            return ResponseEntity.status(400).body("Webhook error: " + e.getMessage());
+        }
+    }
+}
+

@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Rol;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class RolService {
         return rolRepository.findAll();
     }
 
+    @Loggable("CREAR_ROL")
     public Rol createRol(Rol rol) throws Exception {
         Optional<Rol> existing = rolRepository.findByNombre(rol.getNombre());
         if (existing.isPresent()) {
@@ -32,12 +34,13 @@ public class RolService {
                 .orElseThrow(() -> new Exception("Rol no encontrado"));
     }
 
-
+    @Loggable("ELIMINAR_ROL")
     public void deleteRol(Long id) throws Exception {
         Rol rol = getRolById(id);
         rolRepository.delete(rol);
     }
 
+    @Loggable("ACTUALIZAR_ROL")
     public Rol updateRol(Long id, Rol updatedRol) throws Exception {
         Rol rol = getRolById(id);
         rol.setNombre(updatedRol.getNombre());

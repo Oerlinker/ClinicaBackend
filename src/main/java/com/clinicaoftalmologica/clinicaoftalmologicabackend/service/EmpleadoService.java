@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cargo;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
@@ -40,6 +41,7 @@ public class EmpleadoService {
         return empleadoRepository.findAll();
     }
 
+    @Loggable("REGISTRAR_EMPLEADO")
     public Empleado createEmpleado(EmpleadoRegisterDTO dto) throws Exception {
         Cargo cargo = cargoRepository.findById(dto.getCargoId())
                 .orElseThrow(() -> new Exception("Cargo no encontrado"));
@@ -81,6 +83,7 @@ public class EmpleadoService {
         return empleadoRepository.save(empleado);
     }
 
+    @Loggable("ACTUALIZAR_EMPLEADO")
     public Empleado updateEmpleado(Long id, Empleado updatedEmpleado) throws Exception {
         Empleado empleado = empleadoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Empleado no encontrado"));
@@ -91,6 +94,7 @@ public class EmpleadoService {
         return empleadoRepository.save(empleado);
     }
 
+    @Loggable("ELIMINAR_EMPLEADO")
     public void deleteEmpleado(Long id) throws Exception {
         Empleado empleado = empleadoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Empleado no encontrado"));

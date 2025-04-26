@@ -1,10 +1,12 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Rol;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ public class UsuarioService {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
+    @Loggable("REGISTRAR_USUARIO")
     public Usuario registrarUsuario(Usuario usuario) throws Exception {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new Exception("El email ya está registrado");
@@ -58,6 +61,7 @@ public class UsuarioService {
         return username;
     }
 
+    @Loggable("LOGIN_USUARIO")
     public Usuario loginUsuario(String email, String password) throws Exception {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         if (usuarioOpt.isPresent()) {
@@ -70,5 +74,12 @@ public class UsuarioService {
         } else {
             throw new Exception("Usuario no encontrado");
         }
+    }
+
+    public Usuario obtenerPorUsername(String username) {
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Usuario no encontrado: " + username)
+                );
     }
 }
