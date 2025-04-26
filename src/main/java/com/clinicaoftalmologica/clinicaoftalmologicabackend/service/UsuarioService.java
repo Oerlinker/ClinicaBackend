@@ -60,7 +60,7 @@ public class UsuarioService {
         }
         return username;
     }
-
+    //probamos sin el Loggable para ver si ese es el error
     public Usuario loginUsuario(String email, String password) throws Exception {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         if (usuarioOpt.isPresent()) {
