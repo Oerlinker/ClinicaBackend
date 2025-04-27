@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import java.util.List;
 public class BitacoraService {
 
     private final BitacoraRepository bitacoraRepo;
+    private final ZoneId boliviaZoneId = ZoneId.of("America/La_Paz");
 
     public BitacoraService(BitacoraRepository bitacoraRepo) {
         this.bitacoraRepo = bitacoraRepo;
@@ -27,6 +30,9 @@ public class BitacoraService {
                           Long entidadId,
                           String detalles) {
         Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
+        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime boliviaDateTime = now.atZone(boliviaZoneId);
+        entry.setFecha(boliviaDateTime.toLocalDateTime());
         bitacoraRepo.save(entry);
     }
 
