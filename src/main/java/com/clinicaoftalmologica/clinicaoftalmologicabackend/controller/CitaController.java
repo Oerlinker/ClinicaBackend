@@ -107,13 +107,37 @@ public class CitaController {
             } else {
                 cita.setEstado("PENDIENTE");
             }
-            
+
             if (data.get("tipo") != null) {
-                cita.setTipo(String.valueOf(data.get("tipo")));
+                String tipo = String.valueOf(data.get("tipo"));
+                cita.setTipo(tipo);
+
+                Long precio;
+
+                switch (tipo.toLowerCase()) {
+                    case "rutina":
+                        precio = 5000L;
+                        break;
+                    case "control":
+                        precio = 7000L;
+                        break;
+                    case "pediátrica":
+                        precio = 6000L;
+                        break;
+                    case "pre-quirúrgica":
+                        precio = 8000L;
+                        break;
+                    case "post-quirúrgica":
+                        precio = 9000L;
+                        break;
+                    default:
+                        precio = 5000L;
+                }
+                cita.setPrecio(precio);
             } else {
                 cita.setTipo("CONSULTA");
             }
-            
+
             Cita nuevaCita = citaService.createCita(cita, doctorId, pacienteId);
             return ResponseEntity.ok(nuevaCita);
         } catch (Exception e) {
