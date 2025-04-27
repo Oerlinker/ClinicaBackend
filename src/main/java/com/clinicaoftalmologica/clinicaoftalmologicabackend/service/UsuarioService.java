@@ -1,6 +1,5 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Rol;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
@@ -22,7 +21,7 @@ public class UsuarioService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-    @Loggable("REGISTRAR_USUARIO")
+
     public Usuario registrarUsuario(Usuario usuario) throws Exception {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new Exception("El email ya está registrado");
@@ -60,8 +59,7 @@ public class UsuarioService {
         }
         return username;
     }
-    //probamos sin el Loggable para ver si ese es el error
-    @Loggable("LOGIN_USUARIO")
+
     public Usuario loginUsuario(String email, String password) throws Exception {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         if (usuarioOpt.isPresent()) {

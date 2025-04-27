@@ -3,46 +3,60 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Bitacora;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.BitacoraRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class BitacoraService {
 
-    @Autowired
-    private BitacoraRepository bitacoraRepository;
+    private final BitacoraRepository bitacoraRepo;
+
+    public BitacoraService(BitacoraRepository bitacoraRepo) {
+        this.bitacoraRepo = bitacoraRepo;
+    }
+
+
+    public void registrar(Usuario usuario,
+                          String accion,
+                          String entidad,
+                          Long entidadId,
+                          String detalles) {
+        Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
+        bitacoraRepo.save(entry);
+    }
+
+
+    public List<Bitacora> getByUsuarioId(Long usuarioId) {
+        return bitacoraRepo.findByUsuarioId(usuarioId);
+    }
 
     public List<Bitacora> getAllEntriesOrdered() {
-        return bitacoraRepository.findAllByOrderByFechaDesc();
+        return bitacoraRepo.findAllByOrderByFechaDesc();
     }
 
-    public List<Bitacora> getByUsuarioId(Long userId) {
-        return bitacoraRepository.findByUsuarioId(userId);
+    public Page<Bitacora> getPage(Pageable pageable) {
+        return bitacoraRepo.findAll(pageable);
     }
 
-    public org.springframework.data.domain.Page<Bitacora> getPage(org.springframework.data.domain.Pageable pageable) {
-        return bitacoraRepository.findAll(pageable);
+    public List<Bitacora> getByFechaRange(LocalDateTime desde,
+                                          LocalDateTime hasta) {
+        return bitacoraRepo.findByFechaBetween(desde, hasta)
+                .stream()
+                .sorted(Comparator.comparing(Bitacora::getFecha).reversed())
+                .toList();
     }
 
-    public List<Bitacora> getByFechaRange(LocalDateTime desde, LocalDateTime hasta) {
-        return bitacoraRepository.findByFechaBetween(desde, hasta);
-    }
-
-    public List<Bitacora> getByUsuarioAndFecha(Long userId, LocalDateTime desde, LocalDateTime hasta) {
-        return bitacoraRepository.findByUsuarioIdAndFechaBetween(userId, desde, hasta);
-    }
-
-    public void registrar(Usuario usuario, String accion, String entidad, Long entidadId, String detalles) {
-        Bitacora bitacora = new Bitacora();
-        bitacora.setUsuario(usuario);
-        bitacora.setAccion(accion);
-        bitacora.setEntidad(entidad);
-        bitacora.setEntidadId(entidadId);
-        bitacora.setDetalles(detalles);
-        bitacora.setFecha(LocalDateTime.now());
-        bitacoraRepository.save(bitacora);
+    public List<Bitacora> getByUsuarioAndFecha(Long usuarioId,
+                                               LocalDateTime desde,
+                                               LocalDateTime hasta) {
+        return bitacoraRepo.findByUsuarioIdAndFechaBetween(usuarioId, desde, hasta)
+                .stream()
+                .sorted(Comparator.comparing(Bitacora::getFecha).reversed())
+                .toList();
     }
 }
