@@ -1,6 +1,7 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.CreatePaymentRequest;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Payment;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.PaymentService;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,5 +42,12 @@ public class PaymentController {
                 req.getPacienteId()
         );
         return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE')")
+    @GetMapping("/cita/{citaId}")
+    public ResponseEntity<Payment> getPagoPorCita(@PathVariable Long citaId) {
+        Payment pago = paymentService.getPaymentByCitaId(citaId);
+        return ResponseEntity.ok(pago);
     }
 }

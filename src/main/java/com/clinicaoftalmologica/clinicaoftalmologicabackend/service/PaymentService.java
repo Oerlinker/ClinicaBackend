@@ -58,4 +58,11 @@ public class PaymentService {
 
         return intent.getClientSecret();
     }
+
+    public Payment getPaymentByCitaId(Long citaId) {
+        return paymentRepo.findByCitaId(citaId)
+                .orElseThrow(() ->
+                        new RuntimeException("No se encontró un pago para la cita " + citaId)
+                );
+    }
 }

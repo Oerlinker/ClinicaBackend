@@ -8,6 +8,7 @@ import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,9 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     private final PaymentRepository paymentRepo;
-    private final CitaService       citaService;
-    @Value("${stripe.webhookSecret}") private String endpointSecret;
+    private final CitaService citaService;
+    @Value("${stripe.webhookSecret}")
+    private String endpointSecret;
 
     public WebhookController(PaymentRepository paymentRepo,
                              CitaService citaService) {
@@ -34,22 +36,28 @@ public class WebhookController {
             Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
 
             if ("payment_intent.succeeded".equals(event.getType())) {
-                PaymentIntent intent = (PaymentIntent) event.getDataObjectDeserializer()
+                PaymentIntent intent = (PaymentIntent) event
+                        .getDataObjectDeserializer()
                         .getObject().orElseThrow();
                 paymentRepo.findByPaymentIntentId(intent.getId())
                         .ifPresent(p -> {
                             p.setStatus(intent.getStatus());
                             paymentRepo.save(p);
+
                             try {
                                 citaService.markCitaPagada(p.getCita().getId());
-                            } catch (Exception ignored) {}
+                            } catch (Exception e) {
+
+                                System.err.println("Error marcando cita como pagada: " + e.getMessage());
+                            }
                         });
             }
 
             return ResponseEntity.ok("");
         } catch (SignatureVerificationException e) {
-            return ResponseEntity.status(400).body("Webhook error: " + e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Webhook error: " + e.getMessage());
         }
     }
 }
-
