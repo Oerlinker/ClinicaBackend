@@ -23,8 +23,8 @@ public class WebhookController {
 
     public WebhookController(PaymentRepository paymentRepo,
                              CitaService citaService) {
-        this.paymentRepo  = paymentRepo;
-        this.citaService  = citaService;
+        this.paymentRepo = paymentRepo;
+        this.citaService = citaService;
     }
 
     @PostMapping("/webhook")
@@ -32,32 +32,41 @@ public class WebhookController {
             @RequestHeader("Stripe-Signature") String sigHeader,
             @RequestBody String payload) {
 
+        Event event;
         try {
-            Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
-
-            if ("payment_intent.succeeded".equals(event.getType())) {
-                PaymentIntent intent = (PaymentIntent) event
-                        .getDataObjectDeserializer()
-                        .getObject().orElseThrow();
-                paymentRepo.findByPaymentIntentId(intent.getId())
-                        .ifPresent(p -> {
-                            p.setStatus(intent.getStatus());
-                            paymentRepo.save(p);
-
-                            try {
-                                citaService.markCitaPagada(p.getCita().getId());
-                            } catch (Exception e) {
-
-                                System.err.println("Error marcando cita como pagada: " + e.getMessage());
-                            }
-                        });
-            }
-
-            return ResponseEntity.ok("");
+            event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
         } catch (SignatureVerificationException e) {
+
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Webhook error: " + e.getMessage());
+        } catch (Exception e) {
+
+            return ResponseEntity.ok("");
         }
+
+
+        if ("payment_intent.succeeded".equals(event.getType())) {
+
+            event.getDataObjectDeserializer()
+                    .getObject()
+                    .filter(obj -> obj instanceof PaymentIntent)
+                    .map(obj -> (PaymentIntent) obj)
+                    .ifPresent(intent -> {
+                        paymentRepo.findByPaymentIntentId(intent.getId())
+                                .ifPresent(p -> {
+                                    p.setStatus(intent.getStatus());
+                                    paymentRepo.save(p);
+                                    try {
+                                        citaService.markCitaPagada(p.getCita().getId());
+                                    } catch (Exception ex) {
+                                        System.err.println("Error marcando cita como pagada: " + ex.getMessage());
+                                    }
+                                });
+                    });
+        }
+
+
+        return ResponseEntity.ok("");
     }
 }
