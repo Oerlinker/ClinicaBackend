@@ -42,7 +42,7 @@ public class Bitacora {
         this.entidad = entidad;
         this.entidadId = entidadId;
         this.detalles = detalles;
-        this.fecha = LocalDateTime.now();
+
     }
 
     public Long getId() {
