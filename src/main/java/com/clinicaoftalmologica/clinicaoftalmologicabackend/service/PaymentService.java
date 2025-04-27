@@ -10,6 +10,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRe
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class PaymentService {
         this.citaRepo = citaRepo;
         this.usuarioRepo = usuarioRepo;
     }
-    @Loggable("CREAR_PAGO")
+    @Transactional(rollbackOn = Exception.class)
     public String createPaymentIntent(long amount,
                                       String currency,
                                       Long citaId,
