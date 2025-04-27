@@ -42,7 +42,6 @@ public class Bitacora {
         this.entidad = entidad;
         this.entidadId = entidadId;
         this.detalles = detalles;
-
     }
 
     public Long getId() {

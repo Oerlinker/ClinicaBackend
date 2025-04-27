@@ -17,7 +17,6 @@ import java.util.List;
 public class BitacoraService {
 
     private final BitacoraRepository bitacoraRepo;
-    private final ZoneId boliviaZoneId = ZoneId.of("America/La_Paz");
 
     public BitacoraService(BitacoraRepository bitacoraRepo) {
         this.bitacoraRepo = bitacoraRepo;
@@ -30,7 +29,7 @@ public class BitacoraService {
                           Long entidadId,
                           String detalles) {
         Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
-        ZonedDateTime ahoraEnLaPaz = ZonedDateTime.now(boliviaZoneId);
+        ZonedDateTime ahoraEnLaPaz = ZonedDateTime.now(ZoneId.of("America/La_Paz"));
         entry.setFecha(ahoraEnLaPaz.toLocalDateTime());
         bitacoraRepo.save(entry);
     }
