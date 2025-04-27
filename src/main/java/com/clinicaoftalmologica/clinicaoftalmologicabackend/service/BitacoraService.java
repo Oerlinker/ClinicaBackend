@@ -30,9 +30,8 @@ public class BitacoraService {
                           Long entidadId,
                           String detalles) {
         Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
-        LocalDateTime now = LocalDateTime.now();
-        ZonedDateTime boliviaDateTime = now.atZone(boliviaZoneId);
-        entry.setFecha(boliviaDateTime.toLocalDateTime());
+        ZonedDateTime ahoraEnLaPaz = ZonedDateTime.now(boliviaZoneId);
+        entry.setFecha(ahoraEnLaPaz.toLocalDateTime());
         bitacoraRepo.save(entry);
     }
 
