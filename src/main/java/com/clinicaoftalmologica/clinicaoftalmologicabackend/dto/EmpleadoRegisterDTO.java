@@ -6,7 +6,7 @@ public class EmpleadoRegisterDTO {
     private String email;
     private String password;
     private Long cargoId;
-    private String especialidad;
+    private Long especialidadId;
     private String fechaContratacion;
     private String salario;
 
@@ -50,12 +50,12 @@ public class EmpleadoRegisterDTO {
         this.cargoId = cargoId;
     }
 
-    public String getEspecialidad() {
-        return especialidad;
+    public Long getEspecialidadId() {
+        return especialidadId;
     }
 
-    public void setEspecialidad(String especialidad) {
-        this.especialidad = especialidad;
+    public void setEspecialidadId(Long especialidadId) {
+        this.especialidadId = especialidadId;
     }
 
     public String getFechaContratacion() {

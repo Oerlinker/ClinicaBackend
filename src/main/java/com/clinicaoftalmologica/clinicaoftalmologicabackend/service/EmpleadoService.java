@@ -13,6 +13,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EspecialidadRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,6 +37,9 @@ public class EmpleadoService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EspecialidadRepository especialidadRepo;
 
     public List<Empleado> getAllEmpleados() {
         return empleadoRepository.findAll();
@@ -72,7 +76,8 @@ public class EmpleadoService {
         Empleado empleado = new Empleado();
         empleado.setCargo(cargo);
         empleado.setUsuario(usuario);
-        empleado.setEspecialidad(dto.getEspecialidad());
+        empleado.setEspecialidad(especialidadRepo.findById(dto.getEspecialidadId())
+                .orElseThrow(() -> new Exception("Especialidad no encontrada")));
         if (dto.getFechaContratacion() != null && !dto.getFechaContratacion().isEmpty()) {
             empleado.setFechaContratacion(LocalDate.parse(dto.getFechaContratacion()));
         }

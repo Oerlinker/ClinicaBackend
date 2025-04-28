@@ -18,8 +18,9 @@ public class Empleado {
     @JoinColumn(name = "cargo_id", nullable = false)
     private Cargo cargo;
 
-    private String especialidad;
-
+    @ManyToOne
+    @JoinColumn(name = "especialidad_id", nullable = false)
+    private Especialidad especialidad;
     @Column(name = "fecha_contratacion")
     private LocalDate fechaContratacion;
 
@@ -33,7 +34,7 @@ public class Empleado {
     public Empleado() {
     }
 
-    public Empleado(Cargo cargo, String especialidad, LocalDate fechaContratacion, BigDecimal salario, Usuario usuario) {
+    public Empleado(Cargo cargo, Especialidad especialidad, LocalDate fechaContratacion, BigDecimal salario, Usuario usuario) {
         this.cargo = cargo;
         this.especialidad = especialidad;
         this.fechaContratacion = fechaContratacion;
@@ -58,11 +59,11 @@ public class Empleado {
         this.cargo = cargo;
     }
 
-    public String getEspecialidad() {
+    public Especialidad getEspecialidad() {
         return especialidad;
     }
 
-    public void setEspecialidad(String especialidad) {
+    public void setEspecialidad(Especialidad especialidad) {
         this.especialidad = especialidad;
     }
 
