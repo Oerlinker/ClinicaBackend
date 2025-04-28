@@ -13,14 +13,15 @@ public class Empleado {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "cargo_id", nullable = false)
     private Cargo cargo;
 
-    @ManyToOne
-    @JoinColumn(name = "especialidad_id", nullable = false)
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "especialidad_id", nullable = true)
     private Especialidad especialidad;
+
     @Column(name = "fecha_contratacion")
     private LocalDate fechaContratacion;
 
@@ -34,7 +35,11 @@ public class Empleado {
     public Empleado() {
     }
 
-    public Empleado(Cargo cargo, Especialidad especialidad, LocalDate fechaContratacion, BigDecimal salario, Usuario usuario) {
+    public Empleado(Cargo cargo,
+                    Especialidad especialidad,
+                    LocalDate fechaContratacion,
+                    BigDecimal salario,
+                    Usuario usuario) {
         this.cargo = cargo;
         this.especialidad = especialidad;
         this.fechaContratacion = fechaContratacion;

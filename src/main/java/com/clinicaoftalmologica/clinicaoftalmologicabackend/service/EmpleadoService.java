@@ -4,16 +4,17 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cargo;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Especialidad;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Rol;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CargoRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EspecialidadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EspecialidadRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -56,28 +57,39 @@ public class EmpleadoService {
         usuario.setEmail(dto.getEmail());
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        String base = (dto.getNombre() + dto.getApellido()).toLowerCase().replaceAll("\\s+", "");
+
+        String base = (dto.getNombre() + dto.getApellido())
+                .toLowerCase()
+                .replaceAll("\\s+", "");
         String username = base;
         int counter = 1;
         while (usuarioRepository.findByUsername(username).isPresent()) {
-            username = base + counter;
-            counter++;
+            username = base + counter++;
         }
         usuario.setUsername(username);
 
 
-        final String roleToAssign = cargo.getNombre().equalsIgnoreCase("Médico") ? "DOCTOR" : "EMPLEADO";
+        final String roleToAssign = cargo.getNombre()
+                .equalsIgnoreCase("Médico")
+                ? "DOCTOR"
+                : "EMPLEADO";
         Rol rol = rolRepository.findByNombre(roleToAssign)
                 .orElseThrow(() -> new Exception("Rol " + roleToAssign + " no encontrado"));
-
-
         usuario.setRol(rol);
 
         Empleado empleado = new Empleado();
         empleado.setCargo(cargo);
         empleado.setUsuario(usuario);
-        empleado.setEspecialidad(especialidadRepo.findById(dto.getEspecialidadId())
-                .orElseThrow(() -> new Exception("Especialidad no encontrada")));
+
+
+        if (dto.getEspecialidadId() != null) {
+            Especialidad esp = especialidadRepo.findById(dto.getEspecialidadId())
+                    .orElseThrow(() -> new Exception("Especialidad no encontrada"));
+            empleado.setEspecialidad(esp);
+        } else {
+            empleado.setEspecialidad(null);
+        }
+
         if (dto.getFechaContratacion() != null && !dto.getFechaContratacion().isEmpty()) {
             empleado.setFechaContratacion(LocalDate.parse(dto.getFechaContratacion()));
         }
@@ -92,8 +104,12 @@ public class EmpleadoService {
     public Empleado updateEmpleado(Long id, Empleado updatedEmpleado) throws Exception {
         Empleado empleado = empleadoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Empleado no encontrado"));
+
         empleado.setCargo(updatedEmpleado.getCargo());
+
+
         empleado.setEspecialidad(updatedEmpleado.getEspecialidad());
+
         empleado.setFechaContratacion(updatedEmpleado.getFechaContratacion());
         empleado.setSalario(updatedEmpleado.getSalario());
         return empleadoRepository.save(empleado);
