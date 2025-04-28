@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -16,7 +17,6 @@ public class Empleado {
     @ManyToOne
     @JoinColumn(name = "cargo_id", nullable = false)
     private Cargo cargo;
-
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "especialidad_id", nullable = true)
@@ -94,5 +94,22 @@ public class Empleado {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+
+    @Transient
+    public Long getEspecialidadId() {
+        return especialidad != null ? especialidad.getId() : null;
+    }
+
+    @JsonProperty("especialidadId")
+    public void setEspecialidadId(Long id) {
+        if (id != null) {
+            Especialidad e = new Especialidad();
+            e.setId(id);
+            this.especialidad = e;
+        } else {
+            this.especialidad = null;
+        }
     }
 }
