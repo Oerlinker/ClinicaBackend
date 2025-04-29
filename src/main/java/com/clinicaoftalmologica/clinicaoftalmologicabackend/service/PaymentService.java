@@ -21,6 +21,7 @@ public class PaymentService {
     private final CitaRepository citaRepo;
     private final UsuarioRepository usuarioRepo;
 
+
     public PaymentService(PaymentRepository paymentRepo,
                           CitaRepository citaRepo,
                           UsuarioRepository usuarioRepo) {
@@ -28,6 +29,7 @@ public class PaymentService {
         this.citaRepo = citaRepo;
         this.usuarioRepo = usuarioRepo;
     }
+    @Loggable("PAGO_CITA")
     @Transactional(rollbackOn = Exception.class)
     public String createPaymentIntent(long amount,
                                       String currency,
