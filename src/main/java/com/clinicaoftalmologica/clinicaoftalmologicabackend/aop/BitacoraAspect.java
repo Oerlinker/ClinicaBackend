@@ -3,10 +3,17 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.aop;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.BitacoraService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -17,33 +24,44 @@ public class BitacoraAspect {
 
     private final BitacoraService bitacoraService;
     private final UsuarioService usuarioService;
+    private final HttpServletRequest request;
 
-    public BitacoraAspect(BitacoraService bitacoraService,
-                          UsuarioService usuarioService) {
+    @Autowired
+    public BitacoraAspect(BitacoraService bitacoraService, UsuarioService usuarioService, HttpServletRequest request) {
         this.bitacoraService = bitacoraService;
         this.usuarioService = usuarioService;
+        this.request = request;
     }
 
-    @Around("@annotation(loggable)")
+    @Pointcut("@annotation(com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable)")
+    public void loggableMethods() {
+    }
+
+    @Around("loggableMethods() && @annotation(loggable)")
     public Object logAround(ProceedingJoinPoint jp, Loggable loggable) throws Throwable {
+        String username = "SYSTEM";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Object result = jp.proceed();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            username = authentication.getName();
+        } else {
+            Object[] args = jp.getArgs();
+            for (Object arg : args) {
+                if (arg instanceof Usuario) {
+                    username = ((Usuario) arg).getUsername();
+                    break;
+                }
+            }
+        }
 
-
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
         Usuario usuario = usuarioService.obtenerPorUsername(username);
-
-
+        Object result = jp.proceed();
         Object[] args = jp.getArgs();
         String detalles = "Método: " + jp.getSignature().getName()
                 + ", args=" + Arrays.toString(args);
-
-
         String entidad = jp.getSignature()
                 .getDeclaringType().getSimpleName();
         Long entidadId = null;
-
 
         if (result != null) {
             try {
@@ -55,7 +73,6 @@ public class BitacoraAspect {
             } catch (Exception ignore) {
             }
         }
-
 
         if (entidadId == null && args != null) {
             for (Object arg : args) {
@@ -75,13 +92,15 @@ public class BitacoraAspect {
             }
         }
 
+        String ip = request.getRemoteAddr();
 
         bitacoraService.registrar(
                 usuario,
                 loggable.value(),
                 entidad,
                 entidadId,
-                detalles
+                detalles,
+                ip
         );
 
         return result;

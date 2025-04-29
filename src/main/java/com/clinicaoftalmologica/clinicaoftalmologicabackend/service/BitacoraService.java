@@ -27,8 +27,9 @@ public class BitacoraService {
                           String accion,
                           String entidad,
                           Long entidadId,
-                          String detalles) {
-        Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
+                          String detalles,
+                          String ip) {
+        Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles, ip);
         ZonedDateTime ahoraEnLaPaz = ZonedDateTime.now(ZoneId.of("America/La_Paz"));
         entry.setFecha(ahoraEnLaPaz.toLocalDateTime());
         bitacoraRepo.save(entry);
