@@ -61,7 +61,7 @@ public class PaymentService {
 
         return intent.getClientSecret();
     }
-
+    @Loggable("OBTENER_PAGO_CITA")
     public Payment getPaymentByCitaId(Long citaId) {
         return paymentRepo.findByCitaId(citaId)
                 .orElseThrow(() ->

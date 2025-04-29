@@ -74,7 +74,7 @@ public class UsuarioService {
             throw new Exception("Usuario no encontrado");
         }
     }
-
+    @Loggable("OBTENER_USUARIO")
     public Usuario obtenerPorUsername(String username) {
         return usuarioRepository.findByUsername(username)
                 .orElseThrow(() ->
