@@ -22,7 +22,7 @@ public class UsuarioService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-    @Loggable("REGISTRO")
+
     public Usuario registrarUsuario(Usuario usuario) throws Exception {
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new Exception("El email ya está registrado");
@@ -60,7 +60,7 @@ public class UsuarioService {
         }
         return username;
     }
-    @Loggable("INICIO_SESION")
+
     public Usuario loginUsuario(String email, String password) throws Exception {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         if (usuarioOpt.isPresent()) {
