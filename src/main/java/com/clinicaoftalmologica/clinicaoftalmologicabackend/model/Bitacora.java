@@ -36,15 +36,7 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
         public Bitacora() {
         }
-
-        public Bitacora(Usuario usuario, String accion, String entidad, Long entidadId, String detalles) {
-            this.usuario = usuario;
-            this.accion = accion;
-            this.entidad = entidad;
-            this.entidadId = entidadId;
-            this.detalles = detalles;
-        }
-
+        
         public Bitacora(Usuario usuario, String accion, String entidad, Long entidadId, String detalles, String ip) {
             this.usuario = usuario;
             this.accion = accion;

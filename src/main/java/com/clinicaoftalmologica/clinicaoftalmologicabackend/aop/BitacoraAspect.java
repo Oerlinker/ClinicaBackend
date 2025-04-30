@@ -39,70 +39,48 @@ public class BitacoraAspect {
 
     @Around("loggableMethods() && @annotation(loggable)")
     public Object logAround(ProceedingJoinPoint jp, Loggable loggable) throws Throwable {
-        String username = "SYSTEM";
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
-            username = authentication.getName();
-        } else {
-            Object[] args = jp.getArgs();
-            for (Object arg : args) {
-                if (arg instanceof Usuario) {
-                    username = ((Usuario) arg).getUsername();
-                    break;
-                }
+        Object result;
+        try {
+            // 1) intentar obtener usuario, pero sin hacer fallar el login
+            String username = "SYSTEM";
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                username = auth.getName();
             }
-        }
-
-        Usuario usuario = usuarioService.obtenerPorUsername(username);
-        Object result = jp.proceed();
-        Object[] args = jp.getArgs();
-        String detalles = "Método: " + jp.getSignature().getName()
-                + ", args=" + Arrays.toString(args);
-        String entidad = jp.getSignature()
-                .getDeclaringType().getSimpleName();
-        Long entidadId = null;
-
-        if (result != null) {
+            Usuario usuario = null;
             try {
-                Method getId = result.getClass().getMethod("getId");
-                Object id = getId.invoke(result);
-                if (id instanceof Long) {
-                    entidadId = (Long) id;
-                }
-            } catch (Exception ignore) {
+                usuario = usuarioService.obtenerPorUsername(username);
+            } catch (Exception e) {
+                // No hay usuario todavía (login), saltamos el registro
             }
-        }
 
-        if (entidadId == null && args != null) {
-            for (Object arg : args) {
-                if (arg instanceof Long) {
-                    entidadId = (Long) arg;
-                    break;
-                }
-                try {
-                    Method getId = arg.getClass().getMethod("getId");
-                    Object id = getId.invoke(arg);
-                    if (id instanceof Long) {
-                        entidadId = (Long) id;
-                        break;
-                    }
-                } catch (Exception ignore) {
-                }
+            // 2) proceder al método objetivo (login, register, crear empleado, etc.)
+            result = jp.proceed();
+
+            // 3) si obtuvimos un usuario válido, grabamos la bitácora
+            if (usuario != null) {
+                // determinamos entidad, id, detalles (igual que antes)...
+                String entidad = jp.getSignature().getDeclaringType().getSimpleName();
+                Long entidadId = null;
+                // extraer getId() de result o de args...
+                // calcular detalles y IP
+                String detalles = "Método: " + jp.getSignature().getName();
+                String ip = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                        .getRequest().getRemoteAddr();
+
+                bitacoraService.registrar(
+                        usuario,
+                        loggable.value(),
+                        entidad,
+                        entidadId,
+                        detalles,
+                        ip
+                );
             }
+        } catch (Throwable t) {
+            // si algo en el AOP falla, lo capturamos y no interrumpimos la llamada original
+            return jp.proceed();
         }
-
-        String ip = request.getRemoteAddr();
-
-        bitacoraService.registrar(
-                usuario,
-                loggable.value(),
-                entidad,
-                entidadId,
-                detalles,
-                ip
-        );
-
         return result;
     }
 }
