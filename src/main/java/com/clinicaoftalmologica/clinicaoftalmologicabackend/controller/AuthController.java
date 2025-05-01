@@ -6,10 +6,12 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioServi
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.BitacoraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -112,6 +114,12 @@ public class AuthController {
 
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
+    @GetMapping("/usuarios/pacientes")
+    public ResponseEntity<List<Usuario>> getPacientes() {
+        List<Usuario> pacientes = usuarioService.getPacientes();
+        return ResponseEntity.ok(pacientes);
     }
 
     static class LoginRequest {

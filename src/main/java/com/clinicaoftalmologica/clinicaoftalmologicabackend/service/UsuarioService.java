@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -80,5 +82,12 @@ public class UsuarioService {
                 .orElseThrow(() ->
                         new UsernameNotFoundException("Usuario no encontrado: " + username)
                 );
+    }
+
+    @Loggable("LISTAR_PACIENTES")
+    public List<Usuario> getPacientes() {
+        return usuarioRepository.findAll().stream()
+                .filter(u -> u.getRol().getNombre().equalsIgnoreCase("PACIENTE"))
+                .collect(Collectors.toList());
     }
 }
