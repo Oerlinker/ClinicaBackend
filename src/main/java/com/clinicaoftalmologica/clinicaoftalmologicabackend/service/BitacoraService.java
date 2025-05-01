@@ -5,6 +5,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.BitacoraRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+
 public class BitacoraService {
 
     private final BitacoraRepository bitacoraRepo;
@@ -22,7 +24,7 @@ public class BitacoraService {
         this.bitacoraRepo = bitacoraRepo;
     }
 
-
+    @Async
     public void registrar(Usuario usuario,
                           String accion,
                           String entidad,
