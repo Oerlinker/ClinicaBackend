@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
@@ -35,13 +37,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.getClaims(token);
                 String email = claims.getSubject();
                 String username = (String) claims.get("username");
-                String role = (String) claims.get("rol");
+                String rol = (String) claims.get("rol");
+                String cargo = (String) claims.get("cargo");
 
+                List<SimpleGrantedAuthority> authorities =
+                        List.of(new SimpleGrantedAuthority(rol), new SimpleGrantedAuthority(cargo));
 
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                username, null, Collections.singletonList(authority)
+                                username, null, authorities
                         );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
