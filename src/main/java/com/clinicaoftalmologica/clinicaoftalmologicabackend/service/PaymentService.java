@@ -29,8 +29,7 @@ public class PaymentService {
         this.citaRepo = citaRepo;
         this.usuarioRepo = usuarioRepo;
     }
-    @Loggable("GUARDAR_PAGO_CITA")
-    @Transactional(rollbackOn = Exception.class)
+
     public void savePaymentRecord(String paymentIntentId,
                                   long amount,
                                   String currency,
@@ -51,8 +50,7 @@ public class PaymentService {
         paymentRepo.save(p);
     }
 
-    @Loggable("PAGO_CITA")
-    @Transactional(rollbackOn = Exception.class)
+
     public String createPaymentIntent(long amount,
                                       String currency,
                                       Long citaId,
@@ -83,7 +81,7 @@ public class PaymentService {
 
         return intent.getClientSecret();
     }
-    @Loggable("OBTENER_PAGO_CITA")
+
     public Payment getPaymentByCitaId(Long citaId) {
         return paymentRepo.findByCitaId(citaId)
                 .orElseThrow(() ->
