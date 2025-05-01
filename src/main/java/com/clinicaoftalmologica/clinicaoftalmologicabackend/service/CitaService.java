@@ -130,11 +130,12 @@ public class CitaService {
     }
 
     @Loggable("BUSCAR_CITAS_POR_DOCTOR")
-    public List<Cita> getCitasByDoctorId(Long doctorId) {
-        return citaRepository.findByDoctorId(doctorId);
-    }
-    @Loggable("BUSCAR_CITAS_POR_EMPLEADO")
-    public List<Cita> getCitasByEmpleadoId(Long empleadoId) {
+    public List<Cita> getCitasByDoctorId(Long empleadoId) {
         return citaRepository.findByDoctorId(empleadoId);
     }
+
+
 }
+
+
+
