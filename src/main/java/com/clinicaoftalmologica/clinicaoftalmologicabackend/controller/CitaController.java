@@ -215,10 +215,10 @@ public class CitaController {
 
     @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/mis-citas-doctor")
-    public ResponseEntity<List<Cita>> getMisCitasDoctor(
-            @AuthenticationPrincipal Usuario authUser) {
-        return ResponseEntity.ok(
-                citaService.getCitasByDoctorId(authUser.getId())
-        );
+    public ResponseEntity<List<Cita>> getMisCitasDoctor(Principal principal) {
+        String username = principal.getName();
+        Usuario authUser = usuarioService.obtenerPorUsername(username);
+        List<Cita> citas = citaService.getCitasByDoctorId(authUser.getId());
+        return ResponseEntity.ok(citas);
     }
 }
