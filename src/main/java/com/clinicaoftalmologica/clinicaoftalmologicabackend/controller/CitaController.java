@@ -42,7 +42,7 @@ public class CitaController {
     private EmpleadoRepository empleadoRepository;
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping
     public ResponseEntity<List<Cita>> getAllCitas() {
         return ResponseEntity.ok(citaService.getAllCitas());
@@ -145,7 +145,7 @@ public class CitaController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping("/usuario/{userId}")
     public ResponseEntity<List<Cita>> getCitasByUsuario(@PathVariable Long userId) {
         logger.info("Solicitando citas para el usuario con ID: {}", userId);
