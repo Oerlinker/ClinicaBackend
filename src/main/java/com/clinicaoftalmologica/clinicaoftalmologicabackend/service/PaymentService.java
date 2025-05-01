@@ -29,6 +29,27 @@ public class PaymentService {
         this.citaRepo = citaRepo;
         this.usuarioRepo = usuarioRepo;
     }
+    @Loggable("GUARDAR_PAGO_CITA")
+    public void savePaymentRecord(String paymentIntentId,
+                                  long amount,
+                                  String currency,
+                                  Long citaId,
+                                  Long pacienteId) {
+        Cita cita = citaRepo.findById(citaId)
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada: " + citaId));
+        Usuario paciente = usuarioRepo.findById(pacienteId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + pacienteId));
+
+        Payment p = new Payment();
+        p.setPaymentIntentId(paymentIntentId);
+        p.setAmount(amount);
+        p.setCurrency(currency);
+        p.setStatus("pending");  // aún no confirmado
+        p.setCita(cita);
+        p.setPaciente(paciente);
+        paymentRepo.save(p);
+    }
+
     @Loggable("PAGO_CITA")
     @Transactional(rollbackOn = Exception.class)
     public String createPaymentIntent(long amount,

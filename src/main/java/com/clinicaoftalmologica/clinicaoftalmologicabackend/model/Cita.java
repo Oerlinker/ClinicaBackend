@@ -29,6 +29,10 @@ public class Cita {
     @Column(nullable = false)
     private Long precio;
 
+    @Column(name="pago_efectuado", nullable=false,
+            columnDefinition="boolean default false")
+    private Boolean pagoEfectuado = false;
+
     @ManyToOne
     @JoinColumn(name = "paciente_id", nullable = true)
     private Usuario paciente;
@@ -67,17 +71,14 @@ public class Cita {
     }
 
     public void setEstado(CitaEstado estado) {
-
         this.estado = estado;
     }
 
     public String getTipo() {
-
         return tipo;
     }
 
     public void setTipo(String tipo) {
-
         this.tipo = tipo;
     }
 
@@ -89,23 +90,27 @@ public class Cita {
         this.precio = precio;
     }
 
-    public Usuario getPaciente() {
+    public Boolean getPagoEfectuado() {
+        return pagoEfectuado;
+    }
 
+    public void setPagoEfectuado(Boolean pagoEfectuado) {
+        this.pagoEfectuado = pagoEfectuado;
+    }
+
+    public Usuario getPaciente() {
         return paciente;
     }
 
     public void setPaciente(Usuario paciente) {
-
         this.paciente = paciente;
     }
 
     public Empleado getDoctor() {
-
         return doctor;
     }
 
     public void setDoctor(Empleado doctor) {
-
         this.doctor = doctor;
     }
 }

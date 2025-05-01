@@ -2,16 +2,19 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.CreatePaymentRequest;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Payment;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.PaymentService;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
 import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
-import org.springframework.beans.factory.annotation.Value;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -20,12 +23,18 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final String publishableKey;
+
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
+    private final UsuarioService usuarioService;
+
+    @Autowired
     public PaymentController(PaymentService paymentService,
+                             UsuarioService usuarioService,
                              @Value("${stripe.publishableKey}") String publishableKey) {
         this.paymentService = paymentService;
+        this.usuarioService = usuarioService;
         this.publishableKey = publishableKey;
     }
 
@@ -34,35 +43,43 @@ public class PaymentController {
         return ResponseEntity.ok(Map.of("publicKey", publishableKey));
     }
 
-    // *** Nuevo endpoint ***
-    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE','SECRETARIA')")
     @PostMapping("/create-checkout-session")
-    public ResponseEntity<Map<String,String>> createCheckoutSession(
-            @RequestBody CreatePaymentRequest req) throws StripeException {
+    public ResponseEntity<Map<String, String>> createCheckoutSession(
+            @RequestBody CreatePaymentRequest req,
+            Principal principal
+    ) throws StripeException {
 
-        // Construyes la Session de Checkout
+
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(frontendBaseUrl + "/pago-exitoso")
                 .setCancelUrl(frontendBaseUrl + "/dashboard")
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
-                        .setPriceData(
-                                SessionCreateParams.LineItem.PriceData.builder()
-                                        .setCurrency(req.getCurrency())
-                                        .setUnitAmount(req.getAmount())
-                                        .setProductData(
-                                                SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                        .setName("Pago cita #" + req.getCitaId())
-                                                        .build()
-                                        )
-                                        .build()
-                        )
-                        .build()
-                )
+                        .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+                                .setCurrency(req.getCurrency())
+                                .setUnitAmount(req.getAmount())
+                                .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                        .setName("Pago cita #" + req.getCitaId())
+                                        .build())
+                                .build())
+                        .build())
                 .build();
 
         Session session = Session.create(params);
+
+
+        Usuario paciente = usuarioService.obtenerPorUsername(principal.getName());
+        paymentService.savePaymentRecord(
+                session.getPaymentIntent(),
+                req.getAmount(),
+                req.getCurrency(),
+                req.getCitaId(),
+                paciente.getId()
+        );
+
+
         return ResponseEntity.ok(Map.of("url", session.getUrl()));
     }
 

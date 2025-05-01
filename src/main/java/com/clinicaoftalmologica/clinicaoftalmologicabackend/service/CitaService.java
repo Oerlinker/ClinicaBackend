@@ -90,6 +90,7 @@ public class CitaService {
         Cita cita = citaRepository.findById(citaId)
                 .orElseThrow(() -> new Exception("Cita no encontrada con ID: " + citaId));
         cita.setEstado(CitaEstado.PAGADA);
+        cita.setPagoEfectuado(true);
         return citaRepository.save(cita);
     }
 
