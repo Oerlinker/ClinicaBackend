@@ -69,10 +69,16 @@ public class EmpleadoService {
         usuario.setUsername(username);
 
 
-        final String roleToAssign = cargo.getNombre()
-                .equalsIgnoreCase("Médico")
-                ? "DOCTOR"
-                : "EMPLEADO";
+        final String roleToAssign;
+        if (cargo.getNombre().equalsIgnoreCase("Médico")) {
+            roleToAssign = "DOCTOR";
+        } else if (cargo.getNombre().equalsIgnoreCase("Administrador")) {
+            roleToAssign = "ADMIN";
+        } else {
+            roleToAssign = "EMPLEADO";
+        }
+
+
         Rol rol = rolRepository.findByNombre(roleToAssign)
                 .orElseThrow(() -> new Exception("Rol " + roleToAssign + " no encontrado"));
         usuario.setRol(rol);
