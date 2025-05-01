@@ -19,8 +19,9 @@ public class Cita {
     @Column(nullable = false)
     private LocalDateTime hora;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado;
+    private CitaEstado estado;
 
     @Column
     private String tipo;
@@ -61,19 +62,22 @@ public class Cita {
         this.hora = hora;
     }
 
-    public String getEstado() {
+    public CitaEstado getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(CitaEstado estado) {
+
         this.estado = estado;
     }
 
     public String getTipo() {
+
         return tipo;
     }
 
     public void setTipo(String tipo) {
+
         this.tipo = tipo;
     }
 
@@ -86,18 +90,22 @@ public class Cita {
     }
 
     public Usuario getPaciente() {
+
         return paciente;
     }
 
     public void setPaciente(Usuario paciente) {
+
         this.paciente = paciente;
     }
 
     public Empleado getDoctor() {
+
         return doctor;
     }
 
     public void setDoctor(Empleado doctor) {
+
         this.doctor = doctor;
     }
 }

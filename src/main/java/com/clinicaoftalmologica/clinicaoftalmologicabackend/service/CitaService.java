@@ -2,6 +2,7 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
@@ -83,12 +84,56 @@ public class CitaService {
         return citaRepository.findByPacienteId(pacienteId);
     }
 
-    @Loggable("ACTUALIZAR_CITA")
+    @Loggable("PAGAR_CITA")
     @Transactional
     public Cita markCitaPagada(Long citaId) throws Exception {
         Cita cita = citaRepository.findById(citaId)
-                .orElseThrow(() -> new Exception("Cita no encontrada: " + citaId));
-        cita.setEstado("PAGADA");
+                .orElseThrow(() -> new Exception("Cita no encontrada con ID: " + citaId));
+        cita.setEstado(CitaEstado.PAGADA);
         return citaRepository.save(cita);
+    }
+
+    @Loggable("CANCELAR_CITA_PACIENTE")
+    @Transactional
+    public Cita cancelarCitaPorPaciente(Long citaId, Long pacienteId) throws Exception {
+        Cita cita = citaRepository.findById(citaId)
+                .orElseThrow(() -> new Exception("Cita no encontrada"));
+        if (!cita.getPaciente().getId().equals(pacienteId)) {
+            throw new Exception("No puedes cancelar una cita que no es tuya");
+        }
+        cita.setEstado(CitaEstado.CANCELADA);
+        return citaRepository.save(cita);
+    }
+
+    @Loggable("CITA_REALIZADA_DOCTOR")
+    @Transactional
+    public Cita marcarRealizadaPorDoctor(Long citaId, Long doctorId) throws Exception {
+        Cita cita = citaRepository.findById(citaId)
+                .orElseThrow(() -> new Exception("Cita no encontrada"));
+        if (!cita.getDoctor().getId().equals(doctorId)) {
+            throw new Exception("No puedes modificar una cita que no es tuya");
+        }
+        cita.setEstado(CitaEstado.REALIZADA);
+        return citaRepository.save(cita);
+    }
+
+    @Loggable("CANCELAR_CITA_DOCTOR")
+    @Transactional
+    public Cita cancelarCitaPorDoctor(Long citaId, Long doctorId) throws Exception {
+        Cita cita = citaRepository.findById(citaId)
+                .orElseThrow(() -> new Exception("Cita no encontrada"));
+        if (!cita.getDoctor().getId().equals(doctorId)) {
+            throw new Exception("No puedes cancelar una cita que no es tuya");
+        }
+        cita.setEstado(CitaEstado.CANCELADA);
+        return citaRepository.save(cita);
+    }
+
+    @Loggable("BUSCAR_CITAS_POR_DOCTOR")
+    public List<Cita> getCitasByDoctorId(Long doctorId) {
+        logger.info("Buscando citas para el doctor con ID: {}", doctorId);
+        Empleado doctor = empleadoRepository.findById(doctorId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el doctor con ID: " + doctorId));
+        return citaRepository.findByDoctorId(doctorId);
     }
 }

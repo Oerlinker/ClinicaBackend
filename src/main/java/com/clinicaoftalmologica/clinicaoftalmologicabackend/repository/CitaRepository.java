@@ -24,4 +24,6 @@ public interface CitaRepository
                                     @Param("fecha") LocalDate fecha);
 
     List<Cita> findByPacienteId(Long pacienteId);
+
+    List<Cita> findByDoctorId(Long doctorId);
 }
