@@ -56,102 +56,89 @@ public class CitaController {
         return ResponseEntity.ok(citaService.getCitasByPacienteId(u.getId()));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE','SECRETARIA')")
     @PostMapping
     public ResponseEntity<?> createCita(
             @RequestBody Map<String, Object> data,
-            @AuthenticationPrincipal Usuario authUser) {
+            Principal principal
+    ) {
         try {
             logger.info("Datos recibidos para crear cita: {}", data);
+
+
+            Usuario authUser = usuarioService.obtenerPorUsername(principal.getName());
 
             Long doctorId = null;
             Long pacienteId = null;
 
+
             if (data.get("doctorId") != null) {
-                doctorId = Long.valueOf(String.valueOf(data.get("doctorId")));
-            } else if (data.get("doctor") != null && data.get("doctor") instanceof Map) {
-                Map<String, Object> doctorMap = (Map<String, Object>) data.get("doctor");
-                if (doctorMap.get("id") != null) {
-                    doctorId = Long.valueOf(String.valueOf(doctorMap.get("id")));
-                }
+                doctorId = Long.valueOf(data.get("doctorId").toString());
+            } else if (data.get("doctor") instanceof Map) {
+                Map<?,?> m = (Map<?,?>)data.get("doctor");
+                doctorId = Long.valueOf(m.get("id").toString());
             }
+
 
             if ("PACIENTE".equalsIgnoreCase(authUser.getRol().getNombre())) {
                 pacienteId = authUser.getId();
-            } else {
-                if (data.get("pacienteId") != null) {
-                    pacienteId = Long.valueOf(String.valueOf(data.get("pacienteId")));
-                } else if (data.get("paciente") != null && data.get("paciente") instanceof Map) {
-                    Map<String, Object> pacienteMap = (Map<String, Object>) data.get("paciente");
-                    if (pacienteMap.get("id") != null) {
-                        pacienteId = Long.valueOf(String.valueOf(pacienteMap.get("id")));
-                    }
-                }
+            } else if (data.get("pacienteId") != null) {
+                pacienteId = Long.valueOf(data.get("pacienteId").toString());
+            } else if (data.get("paciente") instanceof Map) {
+                Map<?,?> m = (Map<?,?>)data.get("paciente");
+                pacienteId = Long.valueOf(m.get("id").toString());
             }
+
 
             if (doctorId == null) {
-                logger.error("No se encontró doctorId en los datos: {}", data);
                 return ResponseEntity.badRequest().body("El ID del doctor es requerido");
             }
-
             if (pacienteId == null) {
-                logger.error("No se encontró pacienteId en los datos: {}", data);
                 return ResponseEntity.badRequest().body("El ID del paciente es requerido");
             }
-
             logger.info("IDs extraídos: doctorId={}, pacienteId={}", doctorId, pacienteId);
 
+
             Cita cita = new Cita();
-
-            String fechaStr = String.valueOf(data.get("fecha"));
-            String horaStr = String.valueOf(data.get("hora"));
-
-            logger.info("Fecha recibida: {}", fechaStr);
-            logger.info("Hora recibida: {}", horaStr);
+            String fechaStr = data.get("fecha").toString();
+            String horaStr  = data.get("hora").toString();
 
             try {
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDate fecha = LocalDate.parse(fechaStr, dateFormatter);
+                LocalDate fecha = LocalDate.parse(fechaStr,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                LocalTime hora = LocalTime.parse(horaStr,
+                        DateTimeFormatter.ofPattern("HH:mm"));
                 cita.setFecha(fecha);
-
-                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-                LocalTime time = LocalTime.parse(horaStr, timeFormatter);
-
-                LocalDateTime fechaHora = LocalDateTime.of(fecha, time);
-                logger.info("Fecha y hora combinadas: {}", fechaHora);
-                cita.setHora(fechaHora);
+                cita.setHora(LocalDateTime.of(fecha, hora));
             } catch (DateTimeParseException e) {
-                logger.error("Error al parsear fecha u hora: {}", e.getMessage());
-                return ResponseEntity.badRequest().body("Formato de fecha u hora inválido: " + e.getMessage());
+                return ResponseEntity.badRequest()
+                        .body("Formato de fecha u hora inválido: " + e.getMessage());
             }
 
+
             if (data.get("estado") != null) {
-                cita.setEstado(CitaEstado.valueOf(data.get("estado").toString().toUpperCase()));
+                cita.setEstado(
+                        CitaEstado.valueOf(data.get("estado").toString().toUpperCase())
+                );
             } else {
                 cita.setEstado(CitaEstado.PENDIENTE);
             }
+            String tipo = data.getOrDefault("tipo","CONSULTA").toString();
+            cita.setTipo(tipo);
+            long precio = switch (tipo.toLowerCase()) {
+                case "rutina"        -> 5000L;
+                case "control"       -> 7000L;
+                case "pediátrica"    -> 6000L;
+                case "pre-quirúrgica"-> 8000L;
+                case "post-quirúrgica"->9000L;
+                default              -> 5000L;
+            };
+            cita.setPrecio(precio);
 
-            if (data.get("tipo") != null) {
-                String tipo = String.valueOf(data.get("tipo"));
-                cita.setTipo(tipo);
 
-                long precio = switch (tipo.toLowerCase()) {
-                    case "rutina" -> 5000L;
-                    case "control" -> 7000L;
-                    case "pediátrica" -> 6000L;
-                    case "pre-quirúrgica" -> 8000L;
-                    case "post-quirúrgica" -> 9000L;
-                    default -> 5000L;
-                };
+            Cita nueva = citaService.createCita(cita, doctorId, pacienteId);
+            return ResponseEntity.ok(nueva);
 
-                cita.setPrecio(precio);
-            } else {
-                cita.setTipo("CONSULTA");
-                cita.setPrecio(5000L);
-            }
-
-            Cita nuevaCita = citaService.createCita(cita, doctorId, pacienteId);
-            return ResponseEntity.ok(nuevaCita);
         } catch (Exception e) {
             logger.error("Error al crear cita: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(e.getMessage());
