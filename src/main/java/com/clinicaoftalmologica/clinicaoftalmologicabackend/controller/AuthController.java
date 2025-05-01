@@ -115,7 +115,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping("/usuarios/pacientes")
     public ResponseEntity<List<Usuario>> getPacientes() {
         List<Usuario> pacientes = usuarioService.getPacientes();
