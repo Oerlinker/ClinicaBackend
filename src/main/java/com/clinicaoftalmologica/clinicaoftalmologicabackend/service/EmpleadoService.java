@@ -74,10 +74,11 @@ public class EmpleadoService {
             roleToAssign = "DOCTOR";
         } else if (cargo.getNombre().equalsIgnoreCase("Administrador")) {
             roleToAssign = "ADMIN";
+        } else if (cargo.getNombre().equalsIgnoreCase("Secretaria")) {
+            roleToAssign = "SECRETARIA";
         } else {
             roleToAssign = "EMPLEADO";
         }
-
 
         Rol rol = rolRepository.findByNombre(roleToAssign)
                 .orElseThrow(() -> new Exception("Rol " + roleToAssign + " no encontrado"));

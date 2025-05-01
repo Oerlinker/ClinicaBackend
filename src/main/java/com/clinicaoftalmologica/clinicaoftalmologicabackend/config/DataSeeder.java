@@ -12,7 +12,7 @@ public class DataSeeder {
     @Bean
     CommandLineRunner initRoles(RolRepository rolRepository){
         return args -> {
-            String[] roles = {"ADMIN", "DOCTOR", "PACIENTE", "EMPLEADO"};
+            String[] roles = {"ADMIN", "DOCTOR", "PACIENTE", "EMPLEADO","SECRETARIA"};
             for(String roleName : roles){
                 if(rolRepository.findByNombre(roleName).isEmpty()){
                     rolRepository.save(new Rol(roleName));

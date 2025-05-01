@@ -56,7 +56,7 @@ public class CitaController {
         return ResponseEntity.ok(citaService.getCitasByPacienteId(u.getId()));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE','EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE','SECRETARIA')")
     @PostMapping
     public ResponseEntity<?> createCita(
             @RequestBody Map<String, Object> data,
