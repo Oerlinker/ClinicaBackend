@@ -30,6 +30,7 @@ public class PaymentService {
         this.usuarioRepo = usuarioRepo;
     }
     @Loggable("GUARDAR_PAGO_CITA")
+    @Transactional(rollbackOn = Exception.class)
     public void savePaymentRecord(String paymentIntentId,
                                   long amount,
                                   String currency,
@@ -44,7 +45,7 @@ public class PaymentService {
         p.setPaymentIntentId(paymentIntentId);
         p.setAmount(amount);
         p.setCurrency(currency);
-        p.setStatus("pending");  // aún no confirmado
+        p.setStatus("pending");
         p.setCita(cita);
         p.setPaciente(paciente);
         paymentRepo.save(p);
