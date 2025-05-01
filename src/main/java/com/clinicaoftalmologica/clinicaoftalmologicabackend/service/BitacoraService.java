@@ -27,11 +27,11 @@ public class BitacoraService {
                           String accion,
                           String entidad,
                           Long entidadId,
-                          String detalles
-                          ) {
-        Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles);
-        ZonedDateTime ahoraEnLaPaz = ZonedDateTime.now(ZoneId.of("America/La_Paz"));
-        entry.setFecha(ahoraEnLaPaz.toLocalDateTime());
+                          String detalles,
+                          String ip) {
+        Bitacora entry = new Bitacora(usuario, accion, entidad, entidadId, detalles, ip);
+        ZonedDateTime ahora = ZonedDateTime.now(ZoneId.of("America/La_Paz"));
+        entry.setFecha(ahora.toLocalDateTime());
         bitacoraRepo.save(entry);
     }
 

@@ -7,6 +7,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -31,7 +34,8 @@ public class BitacoraAspect {
 
 
         String username = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+                .getAuthentication()
+                .getName();
         Usuario usuario = usuarioService.obtenerPorUsername(username);
 
 
@@ -43,8 +47,6 @@ public class BitacoraAspect {
         String entidad = jp.getSignature()
                 .getDeclaringType().getSimpleName();
         Long entidadId = null;
-
-
         if (result != null) {
             try {
                 Method getId = result.getClass().getMethod("getId");
@@ -55,7 +57,6 @@ public class BitacoraAspect {
             } catch (Exception ignore) {
             }
         }
-
 
         if (entidadId == null && args != null) {
             for (Object arg : args) {
@@ -75,13 +76,19 @@ public class BitacoraAspect {
             }
         }
 
+        String ip = null;
+        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs instanceof ServletRequestAttributes sra) {
+            ip = sra.getRequest().getRemoteAddr();
+        }
 
         bitacoraService.registrar(
                 usuario,
                 loggable.value(),
                 entidad,
                 entidadId,
-                detalles
+                detalles,
+                ip
         );
 
         return result;

@@ -23,6 +23,7 @@ public class Bitacora {
 
     @Column(nullable = false)
     private String entidad;
+
     @Column(name = "entidad_id", nullable = false)
     private Long entidadId;
 
@@ -33,15 +34,19 @@ public class Bitacora {
     @Column(nullable = false)
     private LocalDateTime fecha;
 
+    @Column(name = "ip", nullable = true)
+    private String ip;
+
     public Bitacora() {
     }
 
-    public Bitacora(Usuario usuario, String accion, String entidad, Long entidadId, String detalles) {
+    public Bitacora(Usuario usuario, String accion, String entidad, Long entidadId, String detalles,String ip) {
         this.usuario = usuario;
         this.accion = accion;
         this.entidad = entidad;
         this.entidadId = entidadId;
         this.detalles = detalles;
+        this.ip = ip;
     }
 
     public Long getId() {
@@ -98,5 +103,11 @@ public class Bitacora {
 
     public void setDetalles(String detalles) {
         this.detalles = detalles;
+    }
+    public String getIp() {
+        return ip;
+    }
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }
