@@ -2,7 +2,9 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.CitaService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class CitaController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private EmpleadoRepository empleadoRepository;
 
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -202,10 +207,21 @@ public class CitaController {
 
     @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/mis-citas-doctor")
-    public ResponseEntity<List<Cita>> getMisCitasDoctor(Principal principal) {
-        String username = principal.getName();
-        Usuario authUser = usuarioService.obtenerPorUsername(username);
-        List<Cita> citas = citaService.getCitasByDoctorId(authUser.getId());
+    public ResponseEntity<List<Cita>> getMisCitasDoctor(
+            @AuthenticationPrincipal Usuario authUser
+    ) {
+
+        String username = authUser.getUsername();
+        Usuario usuario = usuarioService.obtenerPorUsername(username);
+
+
+        Empleado doctor = empleadoRepository
+                .findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Empleado no encontrado para usuario " + username
+                ));
+
+        List<Cita> citas = citaService.getCitasByDoctorId(doctor.getId());
         return ResponseEntity.ok(citas);
     }
 }
