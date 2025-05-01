@@ -1,6 +1,5 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
@@ -131,27 +130,15 @@ public class CitaController {
                 String tipo = String.valueOf(data.get("tipo"));
                 cita.setTipo(tipo);
 
-                Long precio;
+                long precio = switch (tipo.toLowerCase()) {
+                    case "rutina" -> 5000L;
+                    case "control" -> 7000L;
+                    case "pediátrica" -> 6000L;
+                    case "pre-quirúrgica" -> 8000L;
+                    case "post-quirúrgica" -> 9000L;
+                    default -> 5000L;
+                };
 
-                switch (tipo.toLowerCase()) {
-                    case "rutina":
-                        precio = 5000L;
-                        break;
-                    case "control":
-                        precio = 7000L;
-                        break;
-                    case "pediátrica":
-                        precio = 6000L;
-                        break;
-                    case "pre-quirúrgica":
-                        precio = 8000L;
-                        break;
-                    case "post-quirúrgica":
-                        precio = 9000L;
-                        break;
-                    default:
-                        precio = 5000L;
-                }
                 cita.setPrecio(precio);
             } else {
                 cita.setTipo("CONSULTA");
