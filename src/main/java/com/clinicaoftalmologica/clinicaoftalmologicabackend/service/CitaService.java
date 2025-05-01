@@ -131,9 +131,6 @@ public class CitaService {
 
     @Loggable("BUSCAR_CITAS_POR_DOCTOR")
     public List<Cita> getCitasByDoctorId(Long doctorId) {
-        logger.info("Buscando citas para el doctor con ID: {}", doctorId);
-        Empleado doctor = empleadoRepository.findById(doctorId)
-                .orElseThrow(() -> new IllegalArgumentException("No se encontró el doctor con ID: " + doctorId));
         return citaRepository.findByDoctorId(doctorId);
     }
 }
