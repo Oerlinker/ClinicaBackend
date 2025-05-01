@@ -170,24 +170,32 @@ public class CitaController {
     @PatchMapping("/{id}/cancelar")
     public ResponseEntity<?> cancelarCita(
             @PathVariable Long id,
-            @AuthenticationPrincipal Usuario user) {
+            Principal principal) {
         try {
-            Cita cita = citaService.cancelarCitaPorPaciente(id, user.getId());
-            return ResponseEntity.ok(cita);
+            String username = principal.getName();
+            Usuario usuario = usuarioService.obtenerPorUsername(username);
+            Cita c = citaService.cancelarCitaPorPaciente(id, usuario.getId());
+            return ResponseEntity.ok(c);
         } catch (Exception e) {
+            logger.error("Error al cancelar cita: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PatchMapping("/{id}/realizar")
     public ResponseEntity<?> realizarCita(
             @PathVariable Long id,
-            @AuthenticationPrincipal Usuario user) {
+            Principal principal) {
         try {
-            Cita cita = citaService.marcarRealizadaPorDoctor(id, user.getId());
-            return ResponseEntity.ok(cita);
+            String username = principal.getName();
+            Usuario usuario = usuarioService.obtenerPorUsername(username);
+            Empleado doctor = empleadoRepository
+                    .findByUsuarioId(usuario.getId())
+                    .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+            Cita c = citaService.marcarRealizadaPorDoctor(id, doctor.getId());
+            return ResponseEntity.ok(c);
         } catch (Exception e) {
+            logger.error("Error al marcar cita como realizada: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -196,24 +204,27 @@ public class CitaController {
     @PatchMapping("/{id}/cancelar-doctor")
     public ResponseEntity<?> cancelarCitaPorDoctor(
             @PathVariable Long id,
-            @AuthenticationPrincipal Usuario user) {
+            Principal principal) {
         try {
-            Cita cita = citaService.cancelarCitaPorDoctor(id, user.getId());
-            return ResponseEntity.ok(cita);
+            String username = principal.getName();
+            Usuario usuario = usuarioService.obtenerPorUsername(username);
+            Empleado doctor = empleadoRepository
+                    .findByUsuarioId(usuario.getId())
+                    .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+            Cita c = citaService.cancelarCitaPorDoctor(id, doctor.getId());
+            return ResponseEntity.ok(c);
         } catch (Exception e) {
+            logger.error("Error al cancelar cita por doctor: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
     @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/mis-citas-doctor")
-    public ResponseEntity<List<Cita>> getMisCitasDoctor(
-            @AuthenticationPrincipal Usuario authUser
-    ) {
+    public ResponseEntity<List<Cita>> getMisCitasDoctor(Principal principal) {
 
-        String username = authUser.getUsername();
+        String username = principal.getName();
+
         Usuario usuario = usuarioService.obtenerPorUsername(username);
-
 
         Empleado doctor = empleadoRepository
                 .findByUsuarioId(usuario.getId())
