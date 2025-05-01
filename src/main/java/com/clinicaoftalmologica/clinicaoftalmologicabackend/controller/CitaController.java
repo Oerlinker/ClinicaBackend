@@ -5,6 +5,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.CitaService;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,6 +34,9 @@ public class CitaController {
     @Autowired
     private CitaService citaService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
@@ -42,11 +47,9 @@ public class CitaController {
 
     @PreAuthorize("hasAuthority('PACIENTE')")
     @GetMapping("/mis-citas")
-    public ResponseEntity<List<Cita>> getMisCitas(
-            @AuthenticationPrincipal Usuario authUser) {
-        return ResponseEntity.ok(
-                citaService.getCitasByPacienteId(authUser.getId())
-        );
+    public ResponseEntity<List<Cita>> getMisCitas(Principal principal) {
+        Usuario u = usuarioService.obtenerPorUsername(principal.getName());
+        return ResponseEntity.ok(citaService.getCitasByPacienteId(u.getId()));
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'PACIENTE')")

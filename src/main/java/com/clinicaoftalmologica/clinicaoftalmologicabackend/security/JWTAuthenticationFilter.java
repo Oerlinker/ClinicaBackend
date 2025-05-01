@@ -33,7 +33,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             try {
                 Claims claims = jwtUtil.getClaims(token);
-                String email = (String) claims.get("email");
+                String email = claims.getSubject();
                 String username = (String) claims.get("username");
                 String role = (String) claims.get("rol");
 

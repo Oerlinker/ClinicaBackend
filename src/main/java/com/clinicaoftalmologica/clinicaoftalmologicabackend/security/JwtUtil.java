@@ -36,7 +36,6 @@ public class JwtUtil {
                 .claim("nombre", usuario.getNombre())
                 .claim("apellido", usuario.getApellido())
                 .claim("rol", usuario.getRol().getNombre())
-                .claim("email", usuario.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
