@@ -42,7 +42,7 @@ public class CitaController {
     private EmpleadoRepository empleadoRepository;
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping
     public ResponseEntity<List<Cita>> getAllCitas() {
         return ResponseEntity.ok(citaService.getAllCitas());
