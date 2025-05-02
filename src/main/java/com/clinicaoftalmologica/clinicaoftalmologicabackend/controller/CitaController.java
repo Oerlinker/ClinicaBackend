@@ -42,7 +42,7 @@ public class CitaController {
     private EmpleadoRepository empleadoRepository;
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
     @GetMapping
     public ResponseEntity<List<Cita>> getAllCitas() {
         return ResponseEntity.ok(citaService.getAllCitas());
@@ -65,26 +65,31 @@ public class CitaController {
         try {
             logger.info("Datos recibidos para crear cita: {}", data);
 
+
             Usuario authUser = usuarioService.obtenerPorUsername(principal.getName());
+            String userRole = authUser.getRol().getNombre();
 
             Long doctorId = null;
             Long pacienteId = null;
 
+
             if (data.get("doctorId") != null) {
                 doctorId = Long.valueOf(data.get("doctorId").toString());
             } else if (data.get("doctor") instanceof Map) {
-                Map<?, ?> m = (Map<?, ?>) data.get("doctor");
+                Map<?,?> m = (Map<?,?>)data.get("doctor");
                 doctorId = Long.valueOf(m.get("id").toString());
             }
 
-            if ("PACIENTE".equalsIgnoreCase(authUser.getRol().getNombre())) {
+
+            if ("PACIENTE".equalsIgnoreCase(userRole)) { // Corregido: usar userRole
                 pacienteId = authUser.getId();
             } else if (data.get("pacienteId") != null) {
                 pacienteId = Long.valueOf(data.get("pacienteId").toString());
             } else if (data.get("paciente") instanceof Map) {
-                Map<?, ?> m = (Map<?, ?>) data.get("paciente");
+                Map<?,?> m = (Map<?,?>)data.get("paciente");
                 pacienteId = Long.valueOf(m.get("id").toString());
             }
+
 
             if (doctorId == null) {
                 return ResponseEntity.badRequest().body("El ID del doctor es requerido");
@@ -94,9 +99,10 @@ public class CitaController {
             }
             logger.info("IDs extraídos: doctorId={}, pacienteId={}", doctorId, pacienteId);
 
+
             Cita cita = new Cita();
             String fechaStr = data.get("fecha").toString();
-            String horaStr = data.get("hora").toString();
+            String horaStr  = data.get("hora").toString();
 
             try {
                 LocalDate fecha = LocalDate.parse(fechaStr,
@@ -111,27 +117,34 @@ public class CitaController {
             }
 
 
-            String rolName = authUser.getRol().getNombre();
-            if ("PACIENTE".equalsIgnoreCase(rolName)) {
-                cita.setEstado(CitaEstado.PENDIENTE);
-                cita.setPagoEfectuado(false);
+            if ("SECRETARIA".equalsIgnoreCase(userRole)) {
+                cita.setEstado(CitaEstado.AGENDADA);
+                logger.info("Usuario SECRETARIA detectado. Estableciendo estado a AGENDADA.");
             } else {
 
-                cita.setEstado(CitaEstado.AGENDADA);
-                cita.setPagoEfectuado(true);
+                if (data.get("estado") != null) {
+                    cita.setEstado(
+                            CitaEstado.valueOf(data.get("estado").toString().toUpperCase())
+                    );
+                } else {
+                    cita.setEstado(CitaEstado.PENDIENTE); // Estado por defecto para requerir pago
+                    logger.info("Usuario no SECRETARIA. Estableciendo estado a PENDIENTE.");
+                }
             }
 
-            String tipo = data.getOrDefault("tipo", "CONSULTA").toString();
+
+            String tipo = data.getOrDefault("tipo","CONSULTA").toString();
             cita.setTipo(tipo);
             long precio = switch (tipo.toLowerCase()) {
-                case "rutina"         -> 5000L;
-                case "control"        -> 7000L;
-                case "pediátrica"     -> 6000L;
-                case "pre-quirúrgica" -> 8000L;
-                case "post-quirúrgica"-> 9000L;
-                default                 -> 5000L;
+                case "rutina"        -> 5000L;
+                case "control"       -> 7000L;
+                case "pediátrica"    -> 6000L;
+                case "pre-quirúrgica"-> 8000L;
+                case "post-quirúrgica"->9000L;
+                default              -> 5000L;
             };
             cita.setPrecio(precio);
+
 
             Cita nueva = citaService.createCita(cita, doctorId, pacienteId);
             return ResponseEntity.ok(nueva);
@@ -142,7 +155,7 @@ public class CitaController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
     @GetMapping("/usuario/{userId}")
     public ResponseEntity<List<Cita>> getCitasByUsuario(@PathVariable Long userId) {
         logger.info("Solicitando citas para el usuario con ID: {}", userId);
