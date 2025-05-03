@@ -37,6 +37,7 @@ public class CitaService {
     @Autowired
     private DisponibilidadService disponibilidadService;
 
+
     @Transactional
     @Loggable("CREAR_CITA")
     public Cita createCita(Cita cita, Long doctorId, Long pacienteId) throws Exception {
@@ -175,6 +176,9 @@ public class CitaService {
         logger.info("Cita con ID: {} eliminada correctamente", id);
     }
 
+    public List<Cita> getCitasByDoctorAndFecha(Long doctorId, LocalDate fecha) {
+        return citaRepository.findByDoctorAndFecha(doctorId, fecha);
+    }
 }
 
 

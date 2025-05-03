@@ -8,6 +8,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoR
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.CitaService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -243,5 +244,14 @@ public class CitaController {
             logger.error("Error al eliminar cita con ID {}: {}", id, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA','DOCTOR')")
+    @GetMapping("/doctor/{doctorId}/fecha/{fecha}")
+    public ResponseEntity<List<Cita>> getCitasByDoctorAndFecha(
+            @PathVariable Long doctorId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        List<Cita> citas = citaService.getCitasByDoctorAndFecha(doctorId, fecha);
+        return ResponseEntity.ok(citas);
     }
 }
