@@ -132,7 +132,7 @@ public class CitaController {
                             CitaEstado.valueOf(data.get("estado").toString().toUpperCase())
                     );
                 } else {
-                    cita.setEstado(CitaEstado.PENDIENTE); // Estado por defecto para requerir pago
+                    cita.setEstado(CitaEstado.PENDIENTE);
                     logger.info("Usuario no SECRETARIA. Estableciendo estado a PENDIENTE.");
                 }
             }
