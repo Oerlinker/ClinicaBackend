@@ -110,12 +110,13 @@ public class CitaController {
             try {
                 LocalDate fecha = LocalDate.parse(fechaStr,
                         DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
                 LocalTime hora = LocalTime.parse(horaStr,
-                        DateTimeFormatter.ofPattern("HH:mm")); // Asumiendo formato HH:mm
+                        DateTimeFormatter.ofPattern("HH:mm:ss"));
                 cita.setFecha(fecha);
                 cita.setHora(LocalDateTime.of(fecha, hora));
             } catch (DateTimeParseException e) {
-
+                logger.error("Error al parsear fecha/hora: fecha='{}', hora='{}', error='{}'", fechaStr, horaStr, e.getMessage());
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Formato de fecha u hora inválido: " + e.getMessage()));
             }
