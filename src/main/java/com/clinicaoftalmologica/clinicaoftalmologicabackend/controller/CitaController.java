@@ -82,7 +82,7 @@ public class CitaController {
             }
 
 
-            if ("PACIENTE".equalsIgnoreCase(userRole)) { // Corregido: usar userRole
+            if ("PACIENTE".equalsIgnoreCase(userRole)) {
                 pacienteId = authUser.getId();
             } else if (data.get("pacienteId") != null) {
                 pacienteId = Long.valueOf(data.get("pacienteId").toString());
@@ -93,10 +93,12 @@ public class CitaController {
 
 
             if (doctorId == null) {
-                return ResponseEntity.badRequest().body("El ID del doctor es requerido");
+
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del doctor es requerido"));
             }
             if (pacienteId == null) {
-                return ResponseEntity.badRequest().body("El ID del paciente es requerido");
+
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del paciente es requerido"));
             }
             logger.info("IDs extraídos: doctorId={}, pacienteId={}", doctorId, pacienteId);
 
@@ -109,12 +111,13 @@ public class CitaController {
                 LocalDate fecha = LocalDate.parse(fechaStr,
                         DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 LocalTime hora = LocalTime.parse(horaStr,
-                        DateTimeFormatter.ofPattern("HH:mm"));
+                        DateTimeFormatter.ofPattern("HH:mm")); // Asumiendo formato HH:mm
                 cita.setFecha(fecha);
                 cita.setHora(LocalDateTime.of(fecha, hora));
             } catch (DateTimeParseException e) {
+
                 return ResponseEntity.badRequest()
-                        .body("Formato de fecha u hora inválido: " + e.getMessage());
+                        .body(Map.of("error", "Formato de fecha u hora inválido: " + e.getMessage()));
             }
 
 
@@ -177,7 +180,7 @@ public class CitaController {
             return ResponseEntity.ok(c);
         } catch (Exception e) {
             logger.error("Error al cancelar cita: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -196,7 +199,7 @@ public class CitaController {
             return ResponseEntity.ok(c);
         } catch (Exception e) {
             logger.error("Error al marcar cita como realizada: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -215,7 +218,7 @@ public class CitaController {
             return ResponseEntity.ok(c);
         } catch (Exception e) {
             logger.error("Error al cancelar cita por doctor: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -242,7 +245,7 @@ public class CitaController {
             return ResponseEntity.ok(Map.of("message", "Cita con ID " + id + " eliminada correctamente."));
         } catch (Exception e) {
             logger.error("Error al eliminar cita con ID {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }
 

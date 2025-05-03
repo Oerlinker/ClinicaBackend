@@ -34,13 +34,13 @@ public class PaymentController {
         return ResponseEntity.ok(Map.of("publicKey", publishableKey));
     }
 
-    // *** Nuevo endpoint ***
+
     @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE')")
     @PostMapping("/create-checkout-session")
     public ResponseEntity<Map<String,String>> createCheckoutSession(
             @RequestBody CreatePaymentRequest req) throws StripeException {
 
-        // Construyes la Session de Checkout
+
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(frontendBaseUrl + "/pago-exitoso")

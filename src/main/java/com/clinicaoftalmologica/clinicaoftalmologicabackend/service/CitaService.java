@@ -56,13 +56,15 @@ public class CitaService {
             throw new Exception("La hora de la cita es requerida");
         }
 
+
         if (cita.getFecha().isBefore(LocalDate.now())) {
             throw new Exception("La fecha de la cita no puede ser anterior a la actual");
         }
 
+
         LocalDateTime ahora = LocalDateTime.now();
-        if (cita.getHora().isBefore(ahora)) {
-            throw new Exception("La hora de la cita no puede ser anterior a la hora actual");
+        if (cita.getFecha().isEqual(LocalDate.now()) && cita.getHora().toLocalTime().isBefore(ahora.toLocalTime())) {
+            throw new Exception("La hora de la cita no puede ser anterior a la hora actual para citas de hoy");
         }
 
 
@@ -73,22 +75,24 @@ public class CitaService {
 
         Disponibilidad disp = disponibilidadService
                 .obtenerPorEmpleadoYFecha(doctorId, cita.getFecha())
-                .orElseThrow(() -> new Exception("No hay disponibilidad configurada para ese día"));
+                .orElseThrow(() -> new Exception("No hay disponibilidad configurada para el doctor en la fecha " + cita.getFecha()));
 
-
-        LocalTime hora = cita.getHora().toLocalTime();
-        if (hora.isBefore(disp.getHoraInicio()) ||
-                hora.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) {
-            throw new Exception("La hora de la cita no está dentro de los turnos disponibles");
+        LocalTime horaCita = cita.getHora().toLocalTime();
+        if (horaCita.isBefore(disp.getHoraInicio()) ||
+                horaCita.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) { // Ajuste para incluir el último slot posible
+            throw new Exception("La hora de la cita (" + horaCita + ") no está dentro del rango disponible ("
+                    + disp.getHoraInicio() + " - " + disp.getHoraFin() + ")");
         }
 
 
         long usadas = citaRepository.countByDoctorIdAndFecha(doctorId, cita.getFecha());
         if (usadas >= disp.getCupos()) {
-            throw new Exception("Se han agotado los cupos para la fecha " + cita.getFecha());
+            throw new Exception("Se han agotado los cupos (" + disp.getCupos() + ") para el doctor " + doctorId + " en la fecha " + cita.getFecha());
         }
-        disp.setCupos(disp.getCupos() - 1);
-        disponibilidadService.actualizar(disp);
+
+        // --- Líneas eliminadas ---
+        // disp.setCupos(disp.getCupos() - 1); // INCORRECTO: No modificar la disponibilidad
+        // disponibilidadService.actualizar(disp); // INCORRECTO: No guardar el cambio
 
         cita.setDoctor(doctor);
         cita.setPaciente(paciente);
