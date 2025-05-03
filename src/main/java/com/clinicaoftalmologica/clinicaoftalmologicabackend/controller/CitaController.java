@@ -246,7 +246,7 @@ public class CitaController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA','DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA','PACIENTE')")
     @GetMapping("/doctor/{doctorId}/fecha/{fecha}")
     public ResponseEntity<List<Cita>> getCitasByDoctorAndFecha(
             @PathVariable Long doctorId,
