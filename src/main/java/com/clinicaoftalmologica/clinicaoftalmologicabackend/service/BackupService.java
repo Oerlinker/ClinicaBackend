@@ -26,10 +26,10 @@ public class BackupService {
     @Value("${PGPORT}")
     private String dbPort;
 
-    @Value("${PGUSER}")
+    @Value("${DATABASE_USERNAME}")
     private String dbUser;
 
-    @Value("${PGPASSWORD}")
+    @Value("${DATABASE_PASSWORD}")
     private String dbPassword;
 
     @Value("${PGDATABASE}")
