@@ -76,7 +76,7 @@ public class CitaController {
             if (data.get("doctorId") != null) {
                 doctorId = Long.valueOf(data.get("doctorId").toString());
             } else if (data.get("doctor") instanceof Map) {
-                Map<?,?> m = (Map<?,?>)data.get("doctor");
+                Map<?, ?> m = (Map<?, ?>) data.get("doctor");
                 doctorId = Long.valueOf(m.get("id").toString());
             }
 
@@ -86,7 +86,7 @@ public class CitaController {
             } else if (data.get("pacienteId") != null) {
                 pacienteId = Long.valueOf(data.get("pacienteId").toString());
             } else if (data.get("paciente") instanceof Map) {
-                Map<?,?> m = (Map<?,?>)data.get("paciente");
+                Map<?, ?> m = (Map<?, ?>) data.get("paciente");
                 pacienteId = Long.valueOf(m.get("id").toString());
             }
 
@@ -102,7 +102,7 @@ public class CitaController {
 
             Cita cita = new Cita();
             String fechaStr = data.get("fecha").toString();
-            String horaStr  = data.get("hora").toString();
+            String horaStr = data.get("hora").toString();
 
             try {
                 LocalDate fecha = LocalDate.parse(fechaStr,
@@ -133,15 +133,15 @@ public class CitaController {
             }
 
 
-            String tipo = data.getOrDefault("tipo","CONSULTA").toString();
+            String tipo = data.getOrDefault("tipo", "CONSULTA").toString();
             cita.setTipo(tipo);
             long precio = switch (tipo.toLowerCase()) {
-                case "rutina"        -> 5000L;
-                case "control"       -> 7000L;
-                case "pediátrica"    -> 6000L;
-                case "pre-quirúrgica"-> 8000L;
-                case "post-quirúrgica"->9000L;
-                default              -> 5000L;
+                case "rutina" -> 5000L;
+                case "control" -> 7000L;
+                case "pediátrica" -> 6000L;
+                case "pre-quirúrgica" -> 8000L;
+                case "post-quirúrgica" -> 9000L;
+                default -> 5000L;
             };
             cita.setPrecio(precio);
 
@@ -151,7 +151,8 @@ public class CitaController {
 
         } catch (Exception e) {
             logger.error("Error al crear cita: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -178,6 +179,7 @@ public class CitaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
     @PreAuthorize("hasAuthority('DOCTOR')")
     @PatchMapping("/{id}/realizar")
     public ResponseEntity<?> realizarCita(
@@ -215,14 +217,12 @@ public class CitaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
     @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/mis-citas-doctor")
     public ResponseEntity<List<Cita>> getMisCitasDoctor(Principal principal) {
-
         String username = principal.getName();
-
         Usuario usuario = usuarioService.obtenerPorUsername(username);
-
         Empleado doctor = empleadoRepository
                 .findByUsuarioId(usuario.getId())
                 .orElseThrow(() -> new RuntimeException(
@@ -231,5 +231,17 @@ public class CitaController {
 
         List<Cita> citas = citaService.getCitasByDoctorId(doctor.getId());
         return ResponseEntity.ok(citas);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCita(@PathVariable Long id) {
+        try {
+            citaService.deleteCita(id);
+            return ResponseEntity.ok(Map.of("message", "Cita con ID " + id + " eliminada correctamente."));
+        } catch (Exception e) {
+            logger.error("Error al eliminar cita con ID {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

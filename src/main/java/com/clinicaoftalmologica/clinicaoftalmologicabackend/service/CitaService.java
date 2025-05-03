@@ -1,12 +1,10 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.*;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.PaymentRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CitaService {
@@ -31,30 +31,32 @@ public class CitaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private DisponibilidadService disponibilidadService;
+
+    @Transactional
     @Loggable("CREAR_CITA")
     public Cita createCita(Cita cita, Long doctorId, Long pacienteId) throws Exception {
-        logger.info("Creando cita con doctorId={}, pacienteId={}, fecha={}, hora={}",
-                doctorId, pacienteId, cita.getFecha(), cita.getHora());
-
+        logger.info("Creando cita con doctorId={}, pacienteId={}, fecha={}, hora={}"
+                , doctorId, pacienteId, cita.getFecha(), cita.getHora());
 
         Empleado doctor = empleadoRepository.findById(doctorId)
                 .orElseThrow(() -> new Exception("Doctor no encontrado con ID: " + doctorId));
-
-
         Usuario paciente = usuarioRepository.findById(pacienteId)
                 .orElseThrow(() -> new Exception("Paciente no encontrado con ID: " + pacienteId));
-
 
         if (cita.getFecha() == null) {
             throw new Exception("La fecha de la cita es requerida");
         }
-
         if (cita.getHora() == null) {
             throw new Exception("La hora de la cita es requerida");
         }
 
         if (cita.getFecha().isBefore(LocalDate.now())) {
-            throw new Exception("La fecha de la cita no puede ser anterior a la fecha actual");
+            throw new Exception("La fecha de la cita no puede ser anterior a la actual");
         }
 
         LocalDateTime ahora = LocalDateTime.now();
@@ -64,15 +66,35 @@ public class CitaService {
 
 
         if (citaRepository.existsByDoctorAndFechaAndHora(doctor, cita.getFecha(), cita.getHora())) {
-            throw new Exception("El doctor ya tiene una cita programada en esa fecha y hora");
+            throw new Exception("El doctor ya tiene una cita en esa fecha y hora");
         }
 
+
+        Disponibilidad disp = disponibilidadService
+                .obtenerPorEmpleadoYFecha(doctorId, cita.getFecha())
+                .orElseThrow(() -> new Exception("No hay disponibilidad configurada para ese día"));
+
+
+        LocalTime hora = cita.getHora().toLocalTime();
+        if (hora.isBefore(disp.getHoraInicio()) ||
+                hora.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) {
+            throw new Exception("La hora de la cita no está dentro de los turnos disponibles");
+        }
+
+
+        long usadas = citaRepository.countByDoctorIdAndFecha(doctorId, cita.getFecha());
+        if (usadas >= disp.getCupos()) {
+            throw new Exception("Se han agotado los cupos para la fecha " + cita.getFecha());
+        }
+        disp.setCupos(disp.getCupos() - 1);
+        disponibilidadService.actualizar(disp);
 
         cita.setDoctor(doctor);
         cita.setPaciente(paciente);
 
-        logger.info("Guardando cita: {}", cita);
-        return citaRepository.save(cita);
+        Cita nueva = citaRepository.save(cita);
+        logger.info("Cita creada con ID: {}", nueva.getId());
+        return nueva;
     }
 
     public List<Cita> getAllCitas() {
@@ -134,6 +156,24 @@ public class CitaService {
         return citaRepository.findByDoctorId(empleadoId);
     }
 
+    @Loggable("ELIMINAR_CITA")
+    @Transactional
+    public void deleteCita(Long id) throws Exception {
+        logger.info("Intentando eliminar cita con ID: {}", id);
+
+        Cita cita = citaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Cita no encontrada con ID: " + id));
+
+
+        paymentRepository.findByCitaId(id).ifPresent(payment -> {
+            logger.info("Eliminando pago asociado con ID: {}", payment.getId());
+            paymentRepository.delete(payment);
+        });
+
+
+        citaRepository.delete(cita);
+        logger.info("Cita con ID: {} eliminada correctamente", id);
+    }
 
 }
 

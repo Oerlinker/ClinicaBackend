@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CitaRepository
-        extends JpaRepository<Cita, Long>,
-        JpaSpecificationExecutor<Cita> {
+        extends JpaRepository<Cita, Long>, JpaSpecificationExecutor<Cita> {
 
     boolean existsByDoctorAndFechaAndHora(Empleado doctor,
                                           LocalDate fecha,
@@ -26,4 +25,6 @@ public interface CitaRepository
     List<Cita> findByPacienteId(Long pacienteId);
 
     List<Cita> findByDoctorId(Long doctorId);
+
+    long countByDoctorIdAndFecha(Long doctorId, LocalDate fecha);
 }
