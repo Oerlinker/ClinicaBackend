@@ -73,53 +73,53 @@ public class DisponibilidadService {
     }
 
 
-    public DisponibilidadDTO getDisponibilidadWithSlots(Long empleadoId, LocalDate fecha) {
-        Disponibilidad disp = repo.findByEmpleadoIdAndFecha(empleadoId, fecha)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Sin disponibilidad para empleado " + empleadoId + " en " + fecha
-                ));
+   public DisponibilidadDTO getDisponibilidadWithSlots(Long empleadoId, LocalDate fecha) {
+       Disponibilidad disp = repo.findByEmpleadoIdAndFecha(empleadoId, fecha)
+               .orElseThrow(() -> new EntityNotFoundException(
+                       "Sin disponibilidad para empleado " + empleadoId + " en " + fecha
+               ));
 
-        // 1. generar todos los slots posibles
-        List<LocalTime> all = new ArrayList<>();
-        LocalTime t = disp.getHoraInicio();
-        while (!t.plusMinutes(disp.getDuracionSlot()).isAfter(disp.getHoraFin())) {
-            all.add(t);
-            t = t.plusMinutes(disp.getDuracionSlot());
-        }
+       List<LocalTime> all = new ArrayList<>();
+       LocalTime t = disp.getHoraInicio();
+       while (t.plusMinutes(disp.getDuracionSlot()).compareTo(disp.getHoraFin()) <= 0) {
+           all.add(t);
+           t = t.plusMinutes(disp.getDuracionSlot());
+       }
 
-        // 2. contar citas por slot
-        List<Cita> citas = citaRepo.findByDoctorAndFecha(empleadoId, fecha);
-        Map<LocalTime, Long> usadas = citas.stream()
-                .collect(Collectors.groupingBy(
-                        c -> c.getHora().toLocalTime(),
-                        Collectors.counting()
-                ));
 
-        // 3. construir DTOs con cuposRestantes = disp.getCupos() - usadas
-        List<DisponibilidadSlotDTO> slots = all.stream()
-                .map(hora -> {
-                    int count = usadas.getOrDefault(hora, 0L).intValue();
-                    int restantes = Math.max(disp.getCupos() - count, 0);
-                    return new DisponibilidadSlotDTO(
-                            hora.toString(),
-                            restantes
-                    );
-                })
-                .collect(Collectors.toList());
+       List<Cita> citas = citaRepo.findByDoctorAndFecha(empleadoId, fecha);
 
-        return new DisponibilidadDTO(
-                disp.getId(),
-                new DisponibilidadDTO.EmpleadoSimpleDTO(
-                        disp.getEmpleado().getId(),
-                        disp.getEmpleado().getUsuario().getNombre() + " " +
-                                disp.getEmpleado().getUsuario().getApellido()
-                ),
-                disp.getFecha(),
-                disp.getCupos(),
-                disp.getDuracionSlot(),
-                disp.getHoraInicio(),
-                disp.getHoraFin(),
-                slots
-        );
-    }
+
+       Map<LocalTime, Long> usadas = citas.stream()
+               .collect(Collectors.groupingBy(
+                       c -> c.getHora().toLocalTime(),
+                       Collectors.counting()
+               ));
+
+       List<DisponibilidadSlotDTO> slots = all.stream()
+               .map(hora -> {
+
+                   int restantes = usadas.containsKey(hora) ? 0 : 1;
+                   return new DisponibilidadSlotDTO(
+                           hora.toString(),
+                           restantes
+                   );
+               })
+               .collect(Collectors.toList());
+
+       return new DisponibilidadDTO(
+               disp.getId(),
+               new DisponibilidadDTO.EmpleadoSimpleDTO(
+                       disp.getEmpleado().getId(),
+                       disp.getEmpleado().getUsuario().getNombre() + " " +
+                               disp.getEmpleado().getUsuario().getApellido()
+               ),
+               disp.getFecha(),
+               disp.getCupos(),
+               disp.getDuracionSlot(),
+               disp.getHoraInicio(),
+               disp.getHoraFin(),
+               slots
+       );
+   }
 }

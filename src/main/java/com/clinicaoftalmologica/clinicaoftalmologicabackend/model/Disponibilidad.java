@@ -38,33 +38,26 @@ public class Disponibilidad {
     public Disponibilidad() { }
 
 
-    public Disponibilidad(Empleado empleado,
-                          LocalDate fecha,
-                          Integer cupos,
-                          Integer duracionSlot) {
-        this.empleado    = empleado;
-        this.fecha       = fecha;
-        this.duracionSlot = duracionSlot;
+    public Disponibilidad(Empleado empleado, LocalDate fecha) {
+        this.empleado = empleado;
+        this.fecha = fecha;
+        this.duracionSlot = 30;
 
         DayOfWeek dia = fecha.getDayOfWeek();
-        if (dia == DayOfWeek.SATURDAY) {
+        if (dia != DayOfWeek.SATURDAY && dia != DayOfWeek.SUNDAY) {
+            this.horaInicio = LocalTime.of(7, 0);
+            this.horaFin = LocalTime.of(16, 0);
+
+            this.cupos = 1;
+        } else if (dia == DayOfWeek.SATURDAY) {
             this.horaInicio = LocalTime.of(9, 0);
-            this.horaFin    = LocalTime.of(14, 0);
-            this.cupos      = Math.min(cupos,
-                    (int)((horaFin.toSecondOfDay() - horaInicio.toSecondOfDay()) / 60 / duracionSlot));
-        }
-        else if (dia == DayOfWeek.SUNDAY) {
+            this.horaFin = LocalTime.of(14, 0);
+            this.cupos = 1;
+        } else {
 
             this.horaInicio = LocalTime.of(0, 0);
-            this.horaFin    = LocalTime.of(0, 0);
-            this.cupos      = 0;
-        }
-        else {
-
-            this.horaInicio = LocalTime.of(7, 0);   // ← cambio: antes era 8:00
-            this.horaFin    = LocalTime.of(16, 0);
-            this.cupos      = Math.min(cupos,
-                    (int)((horaFin.toSecondOfDay() - horaInicio.toSecondOfDay()) / 60 / duracionSlot));
+            this.horaFin = LocalTime.of(0, 0);
+            this.cupos = 0;
         }
     }
 //getters y setters

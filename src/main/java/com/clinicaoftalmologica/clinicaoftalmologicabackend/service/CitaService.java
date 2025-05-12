@@ -78,14 +78,13 @@ public class CitaService {
        }
 
 
-       List<Cita> citasExistentes = citaRepository.findByDoctorAndFecha(doctorId, cita.getFecha());
-       long citasEnMismaHora = citasExistentes.stream()
-               .filter(c -> c.getHora().toLocalTime().equals(horaCita))
-               .count();
+      List<Cita> citasExistentes = citaRepository.findByDoctorAndFecha(doctorId, cita.getFecha());
+      boolean horaOcupada = citasExistentes.stream()
+              .anyMatch(c -> c.getHora().toLocalTime().equals(horaCita));
 
-       if (citasEnMismaHora >= disp.getCupos()) {
-           throw new Exception("Se han agotado los cupos (" + disp.getCupos() + ") para el doctor en la hora seleccionada");
-       }
+      if (horaOcupada) {
+          throw new Exception("La hora " + horaCita + " ya está ocupada para el doctor en la fecha seleccionada");
+      }
 
        cita.setDoctor(doctor);
        cita.setPaciente(paciente);

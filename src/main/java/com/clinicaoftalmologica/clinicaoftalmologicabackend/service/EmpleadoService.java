@@ -42,6 +42,9 @@ public class EmpleadoService {
     @Autowired
     private EspecialidadRepository especialidadRepo;
 
+    @Autowired
+    private DisponibilidadInitService disponibilidadInitService;
+
     public List<Empleado> getAllEmpleados() {
         return empleadoRepository.findAll();
     }
@@ -104,7 +107,17 @@ public class EmpleadoService {
             empleado.setSalario(new BigDecimal(dto.getSalario()));
         }
 
-        return empleadoRepository.save(empleado);
+        empleado = empleadoRepository.save(empleado);
+
+        if (roleToAssign.equals("DOCTOR")) {
+            disponibilidadInitService.crearDisponibilidadesParaDoctor(
+                    empleado.getId(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(30)
+            );
+        }
+
+        return empleado;
     }
 
     @Loggable("ACTUALIZAR_EMPLEADO")

@@ -2,7 +2,10 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.DisponibilidadDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Disponibilidad;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.DisponibilidadInitService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.DisponibilidadService;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,12 @@ public class DisponibilidadController {
 
     @Autowired
     private DisponibilidadService service;
+
+    @Autowired
+    private DisponibilidadInitService disponibilidadInitService;
+
+    @Autowired
+    private EmpleadoService empleadoService;
 
 
     @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
@@ -70,5 +79,43 @@ public class DisponibilidadController {
         DisponibilidadDTO dto =
                 service.getDisponibilidadWithSlots(empleadoId, fecha);
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/generar/{doctorId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
+    public ResponseEntity<?> generarDisponibilidades(
+            @PathVariable Long doctorId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        try {
+            disponibilidadInitService.crearDisponibilidadesParaDoctor(
+                    doctorId,
+                    fechaInicio,
+                    fechaFin
+            );
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/generar-todos")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> generarDisponibilidadesTodos(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        try {
+            List<Empleado> doctores = empleadoService.getDoctores();
+            for (Empleado doctor : doctores) {
+                disponibilidadInitService.crearDisponibilidadesParaDoctor(
+                        doctor.getId(),
+                        fechaInicio,
+                        fechaFin
+                );
+            }
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
