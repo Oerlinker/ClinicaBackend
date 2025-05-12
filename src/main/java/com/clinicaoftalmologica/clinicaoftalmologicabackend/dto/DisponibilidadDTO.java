@@ -1,36 +1,47 @@
-
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.dto;
-
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Disponibilidad;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-public class DisponibilidadConSlotsDTO {
+/**
+ * DTO que representa una disponibilidad de un empleado en una fecha,
+ * junto con sus franjas horarias y cupos restantes por slot.
+ */
+public class DisponibilidadDTO {
+
     private Long id;
     private EmpleadoSimpleDTO empleado;
     private LocalDate fecha;
-    private Integer cupos;
-    private Integer duracionSlot;
+    private int cupos;
+    private int duracionSlot;
     private LocalTime horaInicio;
     private LocalTime horaFin;
-    private List<String> slotsDisponibles;
+    private List<DisponibilidadSlotDTO> slots;
 
+    public DisponibilidadDTO() { }
 
-    public DisponibilidadConSlotsDTO(Disponibilidad d, List<String> slots) {
-        this.id = d.getId();
-        this.empleado = new EmpleadoSimpleDTO(d.getEmpleado());
-        this.fecha = d.getFecha();
-        this.cupos = d.getCupos();
-        this.duracionSlot = d.getDuracionSlot();
-        this.horaInicio = d.getHoraInicio();
-        this.horaFin = d.getHoraFin();
-        this.slotsDisponibles = slots;
+    public DisponibilidadDTO(
+            Long id,
+            EmpleadoSimpleDTO empleado,
+            LocalDate fecha,
+            int cupos,
+            int duracionSlot,
+            LocalTime horaInicio,
+            LocalTime horaFin,
+            List<DisponibilidadSlotDTO> slots
+    ) {
+        this.id = id;
+        this.empleado = empleado;
+        this.fecha = fecha;
+        this.cupos = cupos;
+        this.duracionSlot = duracionSlot;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+        this.slots = slots;
     }
 
-    // Getters y Setters...
+    // ==== Getters y setters ====
 
     public Long getId() {
         return id;
@@ -56,19 +67,19 @@ public class DisponibilidadConSlotsDTO {
         this.fecha = fecha;
     }
 
-    public Integer getCupos() {
+    public int getCupos() {
         return cupos;
     }
 
-    public void setCupos(Integer cupos) {
+    public void setCupos(int cupos) {
         this.cupos = cupos;
     }
 
-    public Integer getDuracionSlot() {
+    public int getDuracionSlot() {
         return duracionSlot;
     }
 
-    public void setDuracionSlot(Integer duracionSlot) {
+    public void setDuracionSlot(int duracionSlot) {
         this.duracionSlot = duracionSlot;
     }
 
@@ -88,29 +99,26 @@ public class DisponibilidadConSlotsDTO {
         this.horaFin = horaFin;
     }
 
-    public List<String> getSlotsDisponibles() {
-        return slotsDisponibles;
+    public List<DisponibilidadSlotDTO> getSlots() {
+        return slots;
     }
 
-    public void setSlotsDisponibles(List<String> slotsDisponibles) {
-        this.slotsDisponibles = slotsDisponibles;
+    public void setSlots(List<DisponibilidadSlotDTO> slots) {
+        this.slots = slots;
     }
 
+    // ==== DTO anidado para datos básicos de empleado ====
 
     public static class EmpleadoSimpleDTO {
         private Long id;
         private String nombreCompleto;
 
-        public EmpleadoSimpleDTO(Empleado e) {
-            this.id = e.getId();
-            if (e.getUsuario() != null) {
-                this.nombreCompleto = e.getUsuario().getNombre() + " " + e.getUsuario().getApellido();
-            } else {
-                this.nombreCompleto = "N/A";
-            }
-        }
+        public EmpleadoSimpleDTO() { }
 
-        // Getters y Setters...
+        public EmpleadoSimpleDTO(Long id, String nombreCompleto) {
+            this.id = id;
+            this.nombreCompleto = nombreCompleto;
+        }
 
         public Long getId() {
             return id;

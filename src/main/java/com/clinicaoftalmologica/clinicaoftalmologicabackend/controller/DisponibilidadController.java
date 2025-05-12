@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.DisponibilidadDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Disponibilidad;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.DisponibilidadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +60,15 @@ public class DisponibilidadController {
         return service.obtenerPorEmpleadoYFecha(empleadoId, fecha)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA','PACIENTE')")
+    @GetMapping("/empleado/{empleadoId}/slots")
+    public ResponseEntity<DisponibilidadDTO> obtenerSlots(
+            @PathVariable Long empleadoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        DisponibilidadDTO dto =
+                service.getDisponibilidadWithSlots(empleadoId, fecha);
+        return ResponseEntity.ok(dto);
     }
 }

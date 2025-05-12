@@ -1,12 +1,13 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.CitaReportFilter;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.DisponibilidadConSlotsDTO;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.DisponibilidadDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.DisponibilidadReportFilter;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Disponibilidad;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.DisponibilidadRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.DisponibilidadService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.specification.CitaSpecification;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.specification.DisponibilidadSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class ReportController {
     @Autowired
     private DisponibilidadRepository dispRepo;
 
+    @Autowired
+    private DisponibilidadService disponibilidadService;
+
     @PostMapping("/citas")
     public ResponseEntity<List<Cita>> reportCitas(@RequestBody CitaReportFilter filter) {
         Specification<Cita> spec = CitaSpecification.withFilters(filter);
@@ -40,48 +44,21 @@ public class ReportController {
     }
 
     @PostMapping("/disponibilidades")
-    public ResponseEntity<List<DisponibilidadConSlotsDTO>> reportDisponibilidades(
+    public ResponseEntity<List<DisponibilidadDTO>> reportDisponibilidades(
             @RequestBody DisponibilidadReportFilter filter) {
 
-        Specification<Disponibilidad> spec =
-                DisponibilidadSpecification.withFilters(filter);
-
         List<Disponibilidad> disponibilidades = dispRepo.findAll(
-                spec,
+                DisponibilidadSpecification.withFilters(filter),
                 Sort.by("fecha").ascending()
         );
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        List<DisponibilidadDTO> resultado = disponibilidades.stream()
+                .map(d -> disponibilidadService.getDisponibilidadWithSlots(
+                        d.getEmpleado().getId(), d.getFecha()
+                ))
+                .collect(Collectors.toList());
 
-        List<DisponibilidadConSlotsDTO> resultado = disponibilidades.stream().map(disp -> {
-            List<Cita> citas = citaRepo.findByDoctorAndFecha(
-                    disp.getEmpleado().getId(),
-                    disp.getFecha()
-            );
-
-            Map<String, Long> bookedSlotsCount = citas.stream()
-                    .filter(c -> c.getHora() != null)
-                    .map(c -> c.getHora().toLocalTime().format(timeFormatter))
-                    .collect(Collectors.groupingBy(hora -> hora, Collectors.counting()));
-
-            List<String> allSlots = new ArrayList<>();
-            LocalTime currentSlot = disp.getHoraInicio();
-            while (!currentSlot.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) {
-                allSlots.add(currentSlot.format(timeFormatter));
-                currentSlot = currentSlot.plusMinutes(disp.getDuracionSlot());
-            }
-
-            List<String> availableSlots = allSlots.stream()
-                    .filter(slot -> {
-                        long usedCount = bookedSlotsCount.getOrDefault(slot, 0L);
-                        return usedCount < disp.getCupos();
-                    })
-                    .collect(Collectors.toList());
-
-            return new DisponibilidadConSlotsDTO(disp, availableSlots);
-        }).collect(Collectors.toList());
         return ResponseEntity.ok(resultado);
     }
-
 
 }

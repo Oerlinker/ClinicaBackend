@@ -38,65 +38,62 @@ public class CitaService {
     private DisponibilidadService disponibilidadService;
 
 
-    @Transactional
-    @Loggable("CREAR_CITA")
-    public Cita createCita(Cita cita, Long doctorId, Long pacienteId) throws Exception {
-        logger.info("Creando cita con doctorId={}, pacienteId={}, fecha={}, hora={}"
-                , doctorId, pacienteId, cita.getFecha(), cita.getHora());
+   @Transactional
+   @Loggable("CREAR_CITA")
+   public Cita createCita(Cita cita, Long doctorId, Long pacienteId) throws Exception {
+       logger.info("Creando cita con doctorId={}, pacienteId={}, fecha={}, hora={}"
+               , doctorId, pacienteId, cita.getFecha(), cita.getHora());
 
-        Empleado doctor = empleadoRepository.findById(doctorId)
-                .orElseThrow(() -> new Exception("Doctor no encontrado con ID: " + doctorId));
-        Usuario paciente = usuarioRepository.findById(pacienteId)
-                .orElseThrow(() -> new Exception("Paciente no encontrado con ID: " + pacienteId));
+       Empleado doctor = empleadoRepository.findById(doctorId)
+               .orElseThrow(() -> new Exception("Doctor no encontrado con ID: " + doctorId));
+       Usuario paciente = usuarioRepository.findById(pacienteId)
+               .orElseThrow(() -> new Exception("Paciente no encontrado con ID: " + pacienteId));
 
-        if (cita.getFecha() == null) {
-            throw new Exception("La fecha de la cita es requerida");
-        }
-        if (cita.getHora() == null) {
-            throw new Exception("La hora de la cita es requerida");
-        }
+       if (cita.getFecha() == null) {
+           throw new Exception("La fecha de la cita es requerida");
+       }
+       if (cita.getHora() == null) {
+           throw new Exception("La hora de la cita es requerida");
+       }
 
+       if (cita.getFecha().isBefore(LocalDate.now())) {
+           throw new Exception("La fecha de la cita no puede ser anterior a la actual");
+       }
 
-        if (cita.getFecha().isBefore(LocalDate.now())) {
-            throw new Exception("La fecha de la cita no puede ser anterior a la actual");
-        }
-
-
-        LocalDateTime ahora = LocalDateTime.now();
-        if (cita.getFecha().isEqual(LocalDate.now()) && cita.getHora().toLocalTime().isBefore(ahora.toLocalTime())) {
-            throw new Exception("La hora de la cita no puede ser anterior a la hora actual para citas de hoy");
-        }
+       LocalDateTime ahora = LocalDateTime.now();
+       if (cita.getFecha().isEqual(LocalDate.now()) && cita.getHora().toLocalTime().isBefore(ahora.toLocalTime())) {
+           throw new Exception("La hora de la cita no puede ser anterior a la hora actual para citas de hoy");
+       }
 
 
-        if (citaRepository.existsByDoctorAndFechaAndHora(doctor, cita.getFecha(), cita.getHora())) {
-            throw new Exception("El doctor ya tiene una cita en esa fecha y hora");
-        }
+       Disponibilidad disp = disponibilidadService
+               .obtenerPorEmpleadoYFecha(doctorId, cita.getFecha())
+               .orElseThrow(() -> new Exception("No hay disponibilidad configurada..."));
 
 
-        Disponibilidad disp = disponibilidadService
-                .obtenerPorEmpleadoYFecha(doctorId, cita.getFecha())
-                .orElseThrow(() -> new Exception("No hay disponibilidad configurada para el doctor en la fecha " + cita.getFecha()));
-
-        LocalTime horaCita = cita.getHora().toLocalTime();
-        if (horaCita.isBefore(disp.getHoraInicio()) ||
-                horaCita.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) { // Ajuste para incluir el último slot posible
-            throw new Exception("La hora de la cita (" + horaCita + ") no está dentro del rango disponible ("
-                    + disp.getHoraInicio() + " - " + disp.getHoraFin() + ")");
-        }
+       LocalTime horaCita = cita.getHora().toLocalTime();
+       if (horaCita.isBefore(disp.getHoraInicio()) ||
+               horaCita.isAfter(disp.getHoraFin().minusMinutes(disp.getDuracionSlot()))) {
+           throw new Exception("La hora de la cita (" + horaCita + ") no está dentro del rango disponible...");
+       }
 
 
-        long usadas = citaRepository.countByDoctorIdAndFecha(doctorId, cita.getFecha());
-        if (usadas >= disp.getCupos()) {
-            throw new Exception("Se han agotado los cupos (" + disp.getCupos() + ") para el doctor " + doctorId + " en la fecha " + cita.getFecha());
-        }
+       List<Cita> citasExistentes = citaRepository.findByDoctorAndFecha(doctorId, cita.getFecha());
+       long citasEnMismaHora = citasExistentes.stream()
+               .filter(c -> c.getHora().toLocalTime().equals(horaCita))
+               .count();
 
-        cita.setDoctor(doctor);
-        cita.setPaciente(paciente);
+       if (citasEnMismaHora >= disp.getCupos()) {
+           throw new Exception("Se han agotado los cupos (" + disp.getCupos() + ") para el doctor en la hora seleccionada");
+       }
 
-        Cita nueva = citaRepository.save(cita);
-        logger.info("Cita creada con ID: {}", nueva.getId());
-        return nueva;
-    }
+       cita.setDoctor(doctor);
+       cita.setPaciente(paciente);
+
+       Cita nueva = citaRepository.save(cita);
+       logger.info("Cita creada con ID: {}", nueva.getId());
+       return nueva;
+   }
 
     public List<Cita> getAllCitas() {
         return citaRepository.findAll();
