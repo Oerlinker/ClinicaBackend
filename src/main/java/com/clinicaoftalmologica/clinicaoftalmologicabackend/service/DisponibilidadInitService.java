@@ -25,6 +25,9 @@ public class DisponibilidadInitService {
     @Autowired
     private RolRepository rolRepository;
 
+    @Autowired
+    private DisponibilidadService disponibilidadService;
+
     @Transactional
     public void crearDisponibilidadesParaDoctor(Long doctorId, LocalDate fechaInicio, LocalDate fechaFin) {
         Empleado doctor = empleadoRepository.findById(doctorId)
@@ -43,7 +46,7 @@ public class DisponibilidadInitService {
                 DayOfWeek dia = fecha.getDayOfWeek();
                 if (dia != DayOfWeek.SATURDAY && dia != DayOfWeek.SUNDAY) {
                     Disponibilidad disp = new Disponibilidad(doctor, fecha);
-                    disponibilidadRepository.save(disp);
+                    disponibilidadService.crear(disp);
                 }
             }
             fecha = fecha.plusDays(1);

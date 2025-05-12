@@ -43,9 +43,8 @@ public class DisponibilidadService {
 
 
         long minutosTotales = ChronoUnit.MINUTES.between(d.getHoraInicio(), d.getHoraFin());
-        int maxCupos = (int)(minutosTotales / d.getDuracionSlot());
-        d.setCupos(Math.min(d.getCupos(), maxCupos));
-
+        int maxCupos       = (int)(minutosTotales / d.getDuracionSlot());
+        d.setCupos(maxCupos);
         return repo.save(d);
     }
 
