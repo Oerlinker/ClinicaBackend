@@ -27,4 +27,15 @@ public interface CitaRepository
     List<Cita> findByDoctorId(Long doctorId);
 
     long countByDoctorIdAndFecha(Long doctorId, LocalDate fecha);
+
+    @Query("""
+  SELECT c 
+  FROM Cita c 
+  WHERE c.fecha = :hoy
+    AND c.estado = 'AGENDADA'
+    AND NOT EXISTS (
+      SELECT 1 FROM Triaje t WHERE t.cita = c
+    )
+""")
+    List<Cita> findPendientesTriajeHoy(@Param("hoy") LocalDate hoy);
 }

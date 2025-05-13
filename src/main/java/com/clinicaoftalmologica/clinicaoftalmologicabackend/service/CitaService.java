@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,16 +179,8 @@ public class CitaService {
 
     @Transactional(readOnly = true)
     public List<Cita> getCitasPendientesTriaje() {
-
-        List<Long> conTriaje = triajeRepo.findAll()
-                .stream()
-                .map(t -> t.getCita().getId())
-                .toList();
-
-        return citaRepository.findAll()
-                .stream()
-                .filter(c -> !conTriaje.contains(c.getId()))
-                .toList();
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/La_Paz"));
+        return citaRepository.findPendientesTriajeHoy(hoy);
     }
 }
 
