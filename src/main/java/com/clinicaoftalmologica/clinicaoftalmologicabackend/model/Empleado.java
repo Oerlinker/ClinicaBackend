@@ -33,7 +33,7 @@ public class Empleado {
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "departamento_id")
+    @JoinColumn(name = "departamento_id", nullable = true)
     private Departamento departamento;
 
     public Empleado() {
