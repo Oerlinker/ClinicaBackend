@@ -258,4 +258,10 @@ public class CitaController {
         List<Cita> citas = citaService.getCitasByDoctorAndFecha(doctorId, fecha);
         return ResponseEntity.ok(citas);
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN','ENFERMERA')")
+    @GetMapping("/pendientes-triaje")
+    public ResponseEntity<List<Cita>> getCitasPendientesTriaje() {
+        return ResponseEntity.ok(citaService.getCitasPendientesTriaje());
+    }
 }

@@ -2,11 +2,8 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.*;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.PaymentRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRepository;
-import jakarta.transaction.Transactional;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -36,6 +33,9 @@ public class CitaService {
 
     @Autowired
     private DisponibilidadService disponibilidadService;
+
+    @Autowired
+    private TriajeRepository triajeRepo;
 
 
    @Transactional
@@ -174,6 +174,20 @@ public class CitaService {
 
     public List<Cita> getCitasByDoctorAndFecha(Long doctorId, LocalDate fecha) {
         return citaRepository.findByDoctorAndFecha(doctorId, fecha);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Cita> getCitasPendientesTriaje() {
+
+        List<Long> conTriaje = triajeRepo.findAll()
+                .stream()
+                .map(t -> t.getCita().getId())
+                .toList();
+
+        return citaRepository.findAll()
+                .stream()
+                .filter(c -> !conTriaje.contains(c.getId()))
+                .toList();
     }
 }
 
