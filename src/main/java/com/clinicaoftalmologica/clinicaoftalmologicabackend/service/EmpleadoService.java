@@ -1,12 +1,9 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoRegisterDTO;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cargo;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Especialidad;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Rol;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.*;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CargoRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
@@ -150,5 +147,31 @@ public class EmpleadoService {
         return empleadoRepository.findAll().stream()
                 .filter(e -> e.getUsuario().getRol().equals(rolDoctor))
                 .collect(Collectors.toList());
+    }
+
+    public List<EmpleadoDTO> listarSinDepartamento() {
+        return empleadoRepository.findByDepartamentoIsNull()
+                .stream().map(EmpleadoDTO::new).toList();
+    }
+
+    public List<EmpleadoDTO> listarPorDepartamento(Long deptId) {
+        return empleadoRepository.findByDepartamentoId(deptId)
+                .stream().map(EmpleadoDTO::new).toList();
+    }
+
+    public void asignarDepartamento(Long empId, Long deptId) throws Exception {
+        Empleado empleado = empleadoRepository.findById(empId)
+                .orElseThrow(() -> new Exception("Empleado no encontrado"));
+        Departamento depto = new Departamento();
+        depto.setId(deptId);
+        empleado.setDepartamento(depto);
+        empleadoRepository.save(empleado);
+    }
+
+    public void quitarDepartamento(Long empId) throws Exception {
+        Empleado empleado = empleadoRepository.findById(empId)
+                .orElseThrow(() -> new Exception("Empleado no encontrado"));
+        empleado.setDepartamento(null);
+        empleadoRepository.save(empleado);
     }
 }

@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.EmpleadoService;
@@ -61,6 +62,41 @@ public class EmpleadoController {
         try {
             List<Empleado> doctores = empleadoService.getDoctores();
             return ResponseEntity.ok(doctores);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/sin-departamento")
+    public ResponseEntity<List<EmpleadoDTO>> getSinDepartamento() {
+        return ResponseEntity.ok(empleadoService.listarSinDepartamento());
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/departamento/{deptId}")
+    public ResponseEntity<List<EmpleadoDTO>> getPorDepartamento(@PathVariable Long deptId) {
+        return ResponseEntity.ok(empleadoService.listarPorDepartamento(deptId));
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/{empId}/departamento/{deptId}")
+    public ResponseEntity<?> asignarDepartamento(
+            @PathVariable Long empId,
+            @PathVariable Long deptId) {
+        try {
+            empleadoService.asignarDepartamento(empId, deptId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/{empId}/sin-departamento")
+    public ResponseEntity<?> quitarDepartamento(@PathVariable Long empId) {
+        try {
+            empleadoService.quitarDepartamento(empId);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
