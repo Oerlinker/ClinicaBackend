@@ -32,6 +32,10 @@ public class Empleado {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "departamento_id")
+    private Departamento departamento;
+
     public Empleado() {
     }
 
@@ -96,6 +100,13 @@ public class Empleado {
         this.usuario = usuario;
     }
 
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
+    }
 
     @Transient
     public Long getEspecialidadId() {
