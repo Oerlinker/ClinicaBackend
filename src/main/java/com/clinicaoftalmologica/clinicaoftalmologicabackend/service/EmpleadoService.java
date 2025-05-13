@@ -79,6 +79,8 @@ public class EmpleadoService {
             roleToAssign = "ADMIN";
         } else if (cargo.getNombre().equalsIgnoreCase("Secretaria")) {
             roleToAssign = "SECRETARIA";
+        } else if (cargo.getNombre().equalsIgnoreCase("Enfermero")) {
+            roleToAssign = "ENFERMERA";
         } else {
             roleToAssign = "EMPLEADO";
         }
