@@ -4,11 +4,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.aop.Loggable;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.EmpleadoRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.*;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CargoRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.RolRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.UsuarioRepository;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EspecialidadRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +37,9 @@ public class EmpleadoService {
 
     @Autowired
     private DisponibilidadInitService disponibilidadInitService;
+
+    @Autowired
+    private DepartamentoRepository departamentoRepository;
 
     public List<Empleado> getAllEmpleados() {
         return empleadoRepository.findAll();
@@ -162,8 +161,8 @@ public class EmpleadoService {
     public void asignarDepartamento(Long empId, Long deptId) throws Exception {
         Empleado empleado = empleadoRepository.findById(empId)
                 .orElseThrow(() -> new Exception("Empleado no encontrado"));
-        Departamento depto = new Departamento();
-        depto.setId(deptId);
+        Departamento depto = departamentoRepository.findById(deptId)
+                .orElseThrow(() -> new Exception("Departamento no encontrado"));
         empleado.setDepartamento(depto);
         empleadoRepository.save(empleado);
     }
