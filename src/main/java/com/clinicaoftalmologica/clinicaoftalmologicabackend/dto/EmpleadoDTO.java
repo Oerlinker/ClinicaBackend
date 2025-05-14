@@ -29,4 +29,9 @@ public class EmpleadoDTO {
     public Long getId() { return id; }
     public String getNombre() { return nombre; }
     public String getApellido() { return apellido; }
+    public String getCargo() { return cargo; }
+    public String getEspecialidad() { return especialidad; }
+    public String getDepartamento() { return departamento; }
+    public String getFechaContratacion() { return fechaContratacion; }
+    public Double getSalario() { return salario; }
 }
