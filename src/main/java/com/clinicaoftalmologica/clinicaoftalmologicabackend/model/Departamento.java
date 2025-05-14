@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class Departamento {
 
 
     @OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Empleado> empleados;
-
 
     public Departamento() {}
 
