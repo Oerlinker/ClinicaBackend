@@ -6,6 +6,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Disponibilidad;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.DisponibilidadRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,14 @@ public class DisponibilidadService {
     @Autowired
     private CitaRepository citaRepo;
 
+    @Autowired
+    private EmpleadoRepository empleadoRepo;
+
     @Transactional
     public Disponibilidad crear(Disponibilidad d) {
         Long empId = d.getEmpleado().getId();
+        d.setEmpleado(empleadoRepo.findById(empId)
+                .orElseThrow(() -> new EntityNotFoundException("Empleado no encontrado")));
         Optional<Disponibilidad> existente =
                 repo.findByEmpleadoIdAndFecha(empId, d.getFecha());
         if (existente.isPresent()) {
