@@ -175,8 +175,4 @@ public class EmpleadoService {
         empleadoRepository.save(empleado);
     }
 
-    public List<EmpleadoDTO> listarTodos() {
-        return empleadoRepository.findAll()
-                .stream().map(EmpleadoDTO::new).toList();
-    }
 }
