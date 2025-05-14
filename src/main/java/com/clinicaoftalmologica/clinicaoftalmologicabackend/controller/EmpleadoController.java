@@ -101,4 +101,14 @@ public class EmpleadoController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/todos")
+    public ResponseEntity<List<EmpleadoDTO>> getTodos() {
+        return ResponseEntity.ok(
+                empleadoService.getAllEmpleados().stream()
+                        .map(EmpleadoDTO::new)
+                        .toList()
+        );
+    }
 }
