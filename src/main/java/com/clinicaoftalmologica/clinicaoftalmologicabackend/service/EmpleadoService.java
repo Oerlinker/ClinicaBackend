@@ -119,17 +119,40 @@ public class EmpleadoService {
     }
 
     @Loggable("ACTUALIZAR_EMPLEADO")
-    public Empleado updateEmpleado(Long id, Empleado updatedEmpleado) throws Exception {
+    public Empleado updateEmpleado(Long id, EmpleadoRegisterDTO dto) throws Exception {
         Empleado empleado = empleadoRepository.findById(id)
                 .orElseThrow(() -> new Exception("Empleado no encontrado"));
 
-        empleado.setCargo(updatedEmpleado.getCargo());
+        if (dto.getCargoId() != null) {
+            Cargo cargo = cargoRepository.findById(dto.getCargoId())
+                    .orElseThrow(() -> new Exception("Cargo no encontrado"));
+            empleado.setCargo(cargo);
+        }
 
+        if (dto.getEspecialidadId() != null) {
+            Especialidad especialidad = especialidadRepo.findById(dto.getEspecialidadId())
+                    .orElse(null);
+            empleado.setEspecialidad(especialidad);
+        } else {
+            empleado.setEspecialidad(null);
+        }
 
-        empleado.setEspecialidad(updatedEmpleado.getEspecialidad());
+        if (dto.getDepartamentoId() != null) {
+            Departamento departamento = departamentoRepository.findById(dto.getDepartamentoId())
+                    .orElse(null);
+            empleado.setDepartamento(departamento);
+        } else {
+            empleado.setDepartamento(null);
+        }
 
-        empleado.setFechaContratacion(updatedEmpleado.getFechaContratacion());
-        empleado.setSalario(updatedEmpleado.getSalario());
+        if (dto.getFechaContratacion() != null && !dto.getFechaContratacion().isEmpty()) {
+            empleado.setFechaContratacion(LocalDate.parse(dto.getFechaContratacion()));
+        }
+
+        if (dto.getSalario() != null && !dto.getSalario().isEmpty()) {
+            empleado.setSalario(new BigDecimal(dto.getSalario()));
+        }
+
         return empleadoRepository.save(empleado);
     }
 

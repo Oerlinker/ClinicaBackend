@@ -9,6 +9,7 @@ public class EmpleadoRegisterDTO {
     private Long especialidadId;
     private String fechaContratacion;
     private String salario;
+    private Long departamentoId;
 
     public String getNombre() {
         return nombre;
@@ -72,5 +73,13 @@ public class EmpleadoRegisterDTO {
 
     public void setSalario(String salario) {
         this.salario = salario;
+    }
+
+    public Long getDepartamentoId() {
+        return departamentoId;
+    }
+
+    public void setDepartamentoId(Long departamentoId) {
+        this.departamentoId = departamentoId;
     }
 }

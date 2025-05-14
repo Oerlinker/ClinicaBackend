@@ -37,9 +37,9 @@ public class EmpleadoController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmpleado(@PathVariable Long id, @RequestBody Empleado empleado) {
+    public ResponseEntity<?> updateEmpleado(@PathVariable Long id, @RequestBody EmpleadoRegisterDTO dto) {
         try {
-            Empleado updatedEmpleado = empleadoService.updateEmpleado(id, empleado);
+            Empleado updatedEmpleado = empleadoService.updateEmpleado(id, dto);
             return ResponseEntity.ok(updatedEmpleado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
