@@ -1,7 +1,7 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.Id;
+
 
 import java.time.LocalDate;
 
