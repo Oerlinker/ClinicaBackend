@@ -174,4 +174,9 @@ public class EmpleadoService {
         empleado.setDepartamento(null);
         empleadoRepository.save(empleado);
     }
+
+    public List<EmpleadoDTO> listarTodos() {
+        return empleadoRepository.findAll()
+                .stream().map(EmpleadoDTO::new).toList();
+    }
 }
