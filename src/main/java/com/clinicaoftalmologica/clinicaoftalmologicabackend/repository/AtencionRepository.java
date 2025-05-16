@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface AtencionRepository extends JpaRepository<Atencion, Long> {
+
     Optional<Atencion> findByCita_Id(Long citaId);
 }

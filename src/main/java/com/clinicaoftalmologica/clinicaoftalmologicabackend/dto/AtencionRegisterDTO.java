@@ -2,36 +2,19 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.dto;
 
 public class AtencionRegisterDTO {
     private Long citaId;
-    private Long doctorId;
-    private Long pacienteId;
 
     private String motivo;
     private String diagnostico;
     private String tratamiento;
     private String observaciones;
 
+    // Getters y setters
     public Long getCitaId() {
         return citaId;
     }
 
     public void setCitaId(Long citaId) {
         this.citaId = citaId;
-    }
-
-    public Long getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Long doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public Long getPacienteId() {
-        return pacienteId;
-    }
-
-    public void setPacienteId(Long pacienteId) {
-        this.pacienteId = pacienteId;
     }
 
     public String getMotivo() {

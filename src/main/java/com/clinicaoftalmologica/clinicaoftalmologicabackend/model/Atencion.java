@@ -1,8 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
 import jakarta.persistence.*;
-
-
 import java.time.LocalDate;
 
 @Entity
@@ -12,36 +10,24 @@ public class Atencion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "cita_id")
+    @OneToOne(optional = false)
+    @JoinColumn(name = "cita_id", referencedColumnName = "id")
     private Cita cita;
-
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private Empleado doctor;
-
-    @ManyToOne
-    @JoinColumn(name = "paciente_id")
-    private Usuario paciente;
 
     private LocalDate fecha;
 
     private String motivo;
     private String diagnostico;
+
+    @Column(length = 1000)
     private String tratamiento;
 
     @Column(length = 1000)
     private String observaciones;
 
     // Getters y setters
-
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Cita getCita() {
@@ -50,22 +36,6 @@ public class Atencion {
 
     public void setCita(Cita cita) {
         this.cita = cita;
-    }
-
-    public Empleado getDoctor() {
-        return doctor;
-    }
-
-    public void setDoctor(Empleado doctor) {
-        this.doctor = doctor;
-    }
-
-    public Usuario getPaciente() {
-        return paciente;
-    }
-
-    public void setPaciente(Usuario paciente) {
-        this.paciente = paciente;
     }
 
     public LocalDate getFecha() {

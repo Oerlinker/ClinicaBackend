@@ -24,14 +24,7 @@ public interface CitaRepository
 
     List<Cita> findByPacienteId(Long pacienteId);
 
-    @Query("""
-    SELECT c FROM Cita c
-    JOIN FETCH c.doctor d
-    JOIN FETCH c.paciente p
-    WHERE d.id = :doctorId
-    AND c.estado = 'AGENDADA'
-""")
-    List<Cita> findByDoctorId(@Param("doctorId") Long doctorId);
+    List<Cita> findByDoctorId(Long doctorId);
 
     long countByDoctorIdAndFecha(Long doctorId, LocalDate fecha);
 
