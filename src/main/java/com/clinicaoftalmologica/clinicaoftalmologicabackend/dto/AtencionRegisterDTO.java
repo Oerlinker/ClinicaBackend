@@ -8,6 +8,8 @@ public class AtencionRegisterDTO {
     private String tratamiento;
     private String observaciones;
 
+    private Long patologiaId;
+
     // Getters y setters
     public Long getCitaId() {
         return citaId;
@@ -47,5 +49,13 @@ public class AtencionRegisterDTO {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    public Long getPatologiaId() {
+        return patologiaId;
+    }
+
+    public void setPatologiaId(Long patologiaId) {
+        this.patologiaId = patologiaId;
     }
 }

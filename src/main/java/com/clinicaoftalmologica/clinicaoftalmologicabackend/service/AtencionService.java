@@ -3,11 +3,15 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Patologia;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.AtencionRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.CitaRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.PatologiaRepository; // <-- importar
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 
@@ -17,11 +21,12 @@ public class AtencionService {
 
     private final AtencionRepository atencionRepository;
     private final CitaRepository citaRepository;
+    private final PatologiaRepository patologiaRepository; // <-- inyectado
 
     @Transactional
     public Atencion registrar(AtencionRegisterDTO dto) {
         Cita cita = citaRepository.findById(dto.getCitaId())
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
 
         Atencion atencion = new Atencion();
         atencion.setCita(cita);
@@ -30,6 +35,13 @@ public class AtencionService {
         atencion.setDiagnostico(dto.getDiagnostico());
         atencion.setTratamiento(dto.getTratamiento());
         atencion.setObservaciones(dto.getObservaciones());
+
+        if (dto.getPatologiaId() != null) {
+            Patologia p = patologiaRepository.findById(dto.getPatologiaId())
+                    .orElseThrow(() ->
+                            new ResponseStatusException(HttpStatus.NOT_FOUND, "Patología no encontrada"));
+            atencion.setPatologia(p);
+        }
 
         return atencionRepository.save(atencion);
     }

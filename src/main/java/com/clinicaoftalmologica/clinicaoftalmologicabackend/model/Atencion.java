@@ -1,6 +1,7 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -24,6 +25,10 @@ public class Atencion {
 
     @Column(length = 1000)
     private String observaciones;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "patologia_id")
+    private Patologia patologia;
 
     // Getters y setters
     public Long getId() {
@@ -77,4 +82,13 @@ public class Atencion {
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
     }
+
+    public Patologia getPatologia() {
+        return patologia;
+    }
+
+    public void setPatologia(Patologia patologia) {
+        this.patologia = patologia;
+    }
 }
+
