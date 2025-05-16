@@ -17,8 +17,7 @@ public class EspecialidadDataSeeder {
                     {"Optometría", "Especialidad que se encarga de la medición de la vista y la adaptación de lentes."},
                     {"Cirugía Refractiva", "Especialidad quirúrgica para corregir problemas de refracción."},
                     {"Retina", "Especialidad que se dedica al diagnóstico y tratamiento de enfermedades de la retina."},
-                    {"Glaucoma", "Especialidad centrada en el diagnóstico y tratamiento del glaucoma."},
-                    {"Enfermera", "Especialidad que se encarga de la atención y cuidado del paciente."}
+                    {"Glaucoma", "Especialidad centrada en el diagnóstico y tratamiento del glaucoma."}
             };
 
             for (String[] especialidadData : especialidadesData) {

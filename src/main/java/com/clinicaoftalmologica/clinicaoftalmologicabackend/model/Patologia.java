@@ -19,7 +19,14 @@ public class Patologia {
     @Column(length = 500)
     private String descripcion;
 
-    public Patologia() {}
+    public Patologia() {
+    }
+
+    public Patologia(String codigo, String nombre, String descripcion) {
+        this.codigo = codigo;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
 
     // Getters y setters
     public Long getId() { return id; }
