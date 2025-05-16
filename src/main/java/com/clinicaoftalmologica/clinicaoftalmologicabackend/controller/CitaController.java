@@ -1,5 +1,6 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.CitaDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +47,22 @@ public class CitaController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping
-    public ResponseEntity<List<Cita>> getAllCitas() {
-        return ResponseEntity.ok(citaService.getAllCitas());
+    public ResponseEntity<List<CitaDTO>> getAllCitas() {
+        List<CitaDTO> citasDTO = citaService.getAllCitas().stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 
 
     @PreAuthorize("hasAuthority('PACIENTE')")
     @GetMapping("/mis-citas")
-    public ResponseEntity<List<Cita>> getMisCitas(Principal principal) {
+    public ResponseEntity<List<CitaDTO>> getMisCitas(Principal principal) {
         Usuario u = usuarioService.obtenerPorUsername(principal.getName());
-        return ResponseEntity.ok(citaService.getCitasByPacienteId(u.getId()));
+        List<CitaDTO> citasDTO = citaService.getCitasByPacienteId(u.getId()).stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','PACIENTE','SECRETARIA')")
@@ -152,7 +160,7 @@ public class CitaController {
 
 
             Cita nueva = citaService.createCita(cita, doctorId, pacienteId);
-            return ResponseEntity.ok(nueva);
+            return ResponseEntity.ok(new CitaDTO(nueva));
 
         } catch (Exception e) {
             logger.error("Error al crear cita: {}", e.getMessage(), e);
@@ -163,10 +171,12 @@ public class CitaController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','EMPLEADO')")
     @GetMapping("/usuario/{userId}")
-    public ResponseEntity<List<Cita>> getCitasByUsuario(@PathVariable Long userId) {
+    public ResponseEntity<List<CitaDTO>> getCitasByUsuario(@PathVariable Long userId) {
         logger.info("Solicitando citas para el usuario con ID: {}", userId);
-        List<Cita> citas = citaService.getCitasByPacienteId(userId);
-        return ResponseEntity.ok(citas);
+        List<CitaDTO> citasDTO = citaService.getCitasByPacienteId(userId).stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 
     @PreAuthorize("hasAuthority('PACIENTE')")
@@ -178,7 +188,7 @@ public class CitaController {
             String username = principal.getName();
             Usuario usuario = usuarioService.obtenerPorUsername(username);
             Cita c = citaService.cancelarCitaPorPaciente(id, usuario.getId());
-            return ResponseEntity.ok(c);
+            return ResponseEntity.ok(new CitaDTO(c));
         } catch (Exception e) {
             logger.error("Error al cancelar cita: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -197,7 +207,7 @@ public class CitaController {
                     .findByUsuarioId(usuario.getId())
                     .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
             Cita c = citaService.marcarRealizadaPorDoctor(id, doctor.getId());
-            return ResponseEntity.ok(c);
+            return ResponseEntity.ok(new CitaDTO(c));
         } catch (Exception e) {
             logger.error("Error al marcar cita como realizada: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -216,7 +226,7 @@ public class CitaController {
                     .findByUsuarioId(usuario.getId())
                     .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
             Cita c = citaService.cancelarCitaPorDoctor(id, doctor.getId());
-            return ResponseEntity.ok(c);
+            return ResponseEntity.ok(new CitaDTO(c));
         } catch (Exception e) {
             logger.error("Error al cancelar cita por doctor: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -225,7 +235,7 @@ public class CitaController {
 
     @PreAuthorize("hasAuthority('DOCTOR')")
     @GetMapping("/mis-citas-doctor")
-    public ResponseEntity<List<Cita>> getMisCitasDoctor(Principal principal) {
+    public ResponseEntity<List<CitaDTO>> getMisCitasDoctor(Principal principal) {
         String username = principal.getName();
         Usuario usuario = usuarioService.obtenerPorUsername(username);
         Empleado doctor = empleadoRepository
@@ -234,8 +244,10 @@ public class CitaController {
                         "Empleado no encontrado para usuario " + username
                 ));
 
-        List<Cita> citas = citaService.getCitasByDoctorId(doctor.getId());
-        return ResponseEntity.ok(citas);
+        List<CitaDTO> citasDTO = citaService.getCitasByDoctorId(doctor.getId()).stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -252,16 +264,21 @@ public class CitaController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA','PACIENTE')")
     @GetMapping("/doctor/{doctorId}/fecha/{fecha}")
-    public ResponseEntity<List<Cita>> getCitasByDoctorAndFecha(
+    public ResponseEntity<List<CitaDTO>> getCitasByDoctorAndFecha(
             @PathVariable Long doctorId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
-        List<Cita> citas = citaService.getCitasByDoctorAndFecha(doctorId, fecha);
-        return ResponseEntity.ok(citas);
+        List<CitaDTO> citasDTO = citaService.getCitasByDoctorAndFecha(doctorId, fecha).stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','ENFERMERA')")
     @GetMapping("/pendientes-triaje")
-    public ResponseEntity<List<Cita>> getCitasPendientesTriaje() {
-        return ResponseEntity.ok(citaService.getCitasPendientesTriaje());
+    public ResponseEntity<List<CitaDTO>> getCitasPendientesTriaje() {
+        List<CitaDTO> citasDTO = citaService.getCitasPendientesTriaje().stream()
+                .map(CitaDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(citasDTO);
     }
 }
