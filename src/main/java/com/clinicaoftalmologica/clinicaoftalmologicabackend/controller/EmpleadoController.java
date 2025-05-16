@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/empleados")
@@ -21,33 +20,29 @@ public class EmpleadoController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<EmpleadoDTO>> getAllEmpleados() {
-        return ResponseEntity.ok(
-            empleadoService.getAllEmpleados().stream()
-                .map(EmpleadoDTO::new)
-                .collect(Collectors.toList())
-        );
+    public ResponseEntity<List<Empleado>> getAllEmpleados() {
+        return ResponseEntity.ok(empleadoService.getAllEmpleados());
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<EmpleadoDTO> createEmpleado(@RequestBody EmpleadoRegisterDTO dto) {
+    public ResponseEntity<?> createEmpleado(@RequestBody EmpleadoRegisterDTO dto) {
         try {
             Empleado nuevoEmpleado = empleadoService.createEmpleado(dto);
-            return ResponseEntity.ok(new EmpleadoDTO(nuevoEmpleado));
+            return ResponseEntity.ok(nuevoEmpleado);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> updateEmpleado(@PathVariable Long id, @RequestBody EmpleadoRegisterDTO dto) {
+    public ResponseEntity<?> updateEmpleado(@PathVariable Long id, @RequestBody EmpleadoRegisterDTO dto) {
         try {
             Empleado updatedEmpleado = empleadoService.updateEmpleado(id, dto);
-            return ResponseEntity.ok(new EmpleadoDTO(updatedEmpleado));
+            return ResponseEntity.ok(updatedEmpleado);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -63,14 +58,12 @@ public class EmpleadoController {
     }
 
     @GetMapping("/doctores")
-    public ResponseEntity<List<EmpleadoDTO>> getDoctores() {
+    public ResponseEntity<?> getDoctores() {
         try {
-            List<EmpleadoDTO> doctoresDTO = empleadoService.getDoctores().stream()
-                    .map(EmpleadoDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(doctoresDTO);
+            List<Empleado> doctores = empleadoService.getDoctores();
+            return ResponseEntity.ok(doctores);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     @PreAuthorize("hasAuthority('ADMIN')")

@@ -1,6 +1,5 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.AtencionService;
@@ -19,10 +18,9 @@ public class AtencionController {
 
     private final AtencionService atencionService;
 
-  @PostMapping
-  @PreAuthorize("hasAuthority('DOCTOR')")
-  public ResponseEntity<AtencionDTO> registrar(@RequestBody AtencionRegisterDTO dto) {
-      Atencion atencion = atencionService.registrar(dto);
-      return ResponseEntity.ok(new AtencionDTO(atencion));
-  }
+    @PostMapping
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    public ResponseEntity<Atencion> registrar(@RequestBody AtencionRegisterDTO dto) {
+        return ResponseEntity.ok(atencionService.registrar(dto));
+    }
 }
