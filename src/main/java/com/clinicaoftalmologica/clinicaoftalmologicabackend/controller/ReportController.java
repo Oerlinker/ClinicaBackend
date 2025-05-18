@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
@@ -36,13 +37,14 @@ public class ReportController {
     @Autowired
     private DisponibilidadService disponibilidadService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/citas")
     public ResponseEntity<List<Cita>> reportCitas(@RequestBody CitaReportFilter filter) {
         Specification<Cita> spec = CitaSpecification.withFilters(filter);
         List<Cita> citas = citaRepo.findAll(spec, Sort.by("fecha").ascending());
         return ResponseEntity.ok(citas);
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/disponibilidades")
     public ResponseEntity<List<DisponibilidadDTO>> reportDisponibilidades(
             @RequestBody DisponibilidadReportFilter filter) {

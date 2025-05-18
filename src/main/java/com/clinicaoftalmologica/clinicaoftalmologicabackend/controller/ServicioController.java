@@ -5,6 +5,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.ServicioResponse
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.ServicioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -24,12 +25,13 @@ public class ServicioController {
         return service.obtenerPorId(id);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ServicioResponseDTO crear(@RequestBody ServicioRegisterDTO dto) {
         return service.crear(dto);
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ServicioResponseDTO actualizar(
             @PathVariable Long id,
@@ -37,7 +39,7 @@ public class ServicioController {
     ) {
         return service.actualizar(id, dto);
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {
