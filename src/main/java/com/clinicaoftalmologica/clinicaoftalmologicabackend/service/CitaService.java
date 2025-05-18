@@ -182,6 +182,10 @@ public class CitaService {
         LocalDate hoy = LocalDate.now(ZoneId.of("America/La_Paz"));
         return citaRepository.findPendientesTriajeHoy(hoy);
     }
+
+    public List<Cita> listarPorUsuario(Long usuarioId) {
+        return citaRepository.findByPacienteId(usuarioId);
+    }
 }
 
 

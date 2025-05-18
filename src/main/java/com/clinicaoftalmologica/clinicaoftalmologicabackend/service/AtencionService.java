@@ -1,6 +1,7 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionRegisterDTO;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionResponseDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Patologia;
@@ -14,6 +15,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +47,12 @@ public class AtencionService {
         }
 
         return atencionRepository.save(atencion);
+    }
+
+    public List<AtencionResponseDTO> listarPorUsuario(Long usuarioId) {
+        return atencionRepository.findByCitaPacienteId(usuarioId)
+                .stream()
+                .map(AtencionResponseDTO::new)
+                .collect(Collectors.toList());
     }
 }
