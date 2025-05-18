@@ -23,8 +23,9 @@ public class Cita {
     @Column(nullable = false)
     private CitaEstado estado;
 
-    @Column
-    private String tipo;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "servicio_id")
+    private Servicio servicio;
 
     @Column(nullable = false)
     private Long precio;
@@ -71,14 +72,12 @@ public class Cita {
         this.estado = estado;
     }
 
-    public String getTipo() {
-
-        return tipo;
+    public Servicio getServicio() {
+        return servicio;
     }
 
-    public void setTipo(String tipo) {
-
-        this.tipo = tipo;
+    public void setServicio(Servicio servicio) {
+        this.servicio = servicio;
     }
 
     public Long getPrecio() {

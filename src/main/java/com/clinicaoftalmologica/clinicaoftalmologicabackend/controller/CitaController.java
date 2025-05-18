@@ -1,10 +1,8 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.CitaEstado;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Empleado;
-import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Usuario;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.*;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.EmpleadoRepository;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.repository.ServicioRepository;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.CitaService;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +40,9 @@ public class CitaController {
     @Autowired
     private EmpleadoRepository empleadoRepository;
 
+    @Autowired
+    private ServicioRepository servicioRepository;
+
 
     @PreAuthorize("hasAnyAuthority('ADMIN','SECRETARIA')")
     @GetMapping
@@ -66,13 +67,11 @@ public class CitaController {
         try {
             logger.info("Datos recibidos para crear cita: {}", data);
 
-
             Usuario authUser = usuarioService.obtenerPorUsername(principal.getName());
             String userRole = authUser.getRol().getNombre();
 
             Long doctorId = null;
             Long pacienteId = null;
-
 
             if (data.get("doctorId") != null) {
                 doctorId = Long.valueOf(data.get("doctorId").toString());
@@ -80,7 +79,6 @@ public class CitaController {
                 Map<?, ?> m = (Map<?, ?>) data.get("doctor");
                 doctorId = Long.valueOf(m.get("id").toString());
             }
-
 
             if ("PACIENTE".equalsIgnoreCase(userRole)) {
                 pacienteId = authUser.getId();
@@ -91,7 +89,6 @@ public class CitaController {
                 pacienteId = Long.valueOf(m.get("id").toString());
             }
 
-
             if (doctorId == null) {
 
                 return ResponseEntity.badRequest().body(Map.of("error", "El ID del doctor es requerido"));
@@ -101,8 +98,6 @@ public class CitaController {
                 return ResponseEntity.badRequest().body(Map.of("error", "El ID del paciente es requerido"));
             }
             logger.info("IDs extraídos: doctorId={}, pacienteId={}", doctorId, pacienteId);
-
-
             Cita cita = new Cita();
             String fechaStr = data.get("fecha").toString();
             String horaStr = data.get("hora").toString();
@@ -121,7 +116,6 @@ public class CitaController {
                         .body(Map.of("error", "Formato de fecha u hora inválido: " + e.getMessage()));
             }
 
-
             if ("SECRETARIA".equalsIgnoreCase(userRole)) {
                 cita.setEstado(CitaEstado.AGENDADA);
                 logger.info("Usuario SECRETARIA detectado. Estableciendo estado a AGENDADA.");
@@ -137,19 +131,26 @@ public class CitaController {
                 }
             }
 
+            final Long servicioIdFinal;
+            Long tempServicioId = null;
 
-            String tipo = data.getOrDefault("tipo", "CONSULTA").toString();
-            cita.setTipo(tipo);
-            long precio = switch (tipo.toLowerCase()) {
-                case "rutina" -> 5000L;
-                case "control" -> 7000L;
-                case "pediátrica" -> 6000L;
-                case "pre-quirúrgica" -> 8000L;
-                case "post-quirúrgica" -> 9000L;
-                default -> 5000L;
-            };
-            cita.setPrecio(precio);
+            if (data.get("servicioId") != null) {
+                tempServicioId = Long.valueOf(data.get("servicioId").toString());
+            } else if (data.get("servicio") instanceof Map) {
+                Map<?, ?> m = (Map<?, ?>) data.get("servicio");
+                tempServicioId = Long.valueOf(m.get("id").toString());
+            }
+            servicioIdFinal = tempServicioId;
 
+
+            if (servicioIdFinal == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del servicio es requerido"));
+            }
+
+            Servicio servicio = servicioRepository.findById(servicioIdFinal)
+                    .orElseThrow(() -> new Exception("Servicio no encontrado con ID: " + servicioIdFinal));
+            cita.setServicio(servicio);
+            cita.setPrecio(servicio.getPrecio());
 
             Cita nueva = citaService.createCita(cita, doctorId, pacienteId);
             return ResponseEntity.ok(nueva);
