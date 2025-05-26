@@ -2,6 +2,7 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.service;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionRegisterDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionResponseDTO;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionDetailDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Patologia;
@@ -53,6 +54,17 @@ public class AtencionService {
         return atencionRepository.findByCitaPacienteId(usuarioId)
                 .stream()
                 .map(AtencionResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<Atencion> findByPacienteId(Long pacienteId) {
+        return atencionRepository.findByCitaPacienteId(pacienteId);
+    }
+
+    public List<AtencionDetailDTO> findAtencionesDetailByPacienteId(Long pacienteId) {
+        List<Atencion> atenciones = atencionRepository.findByCitaPacienteId(pacienteId);
+        return atenciones.stream()
+                .map(AtencionDetailDTO::new)
                 .collect(Collectors.toList());
     }
 }
