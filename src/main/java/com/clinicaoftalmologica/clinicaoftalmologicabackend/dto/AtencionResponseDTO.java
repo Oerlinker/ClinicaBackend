@@ -1,8 +1,11 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.dto;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Tratamiento;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AtencionResponseDTO {
     private Long id;
@@ -12,6 +15,8 @@ public class AtencionResponseDTO {
     private String tratamiento;
     private String observaciones;
     private PatologiaResponseDTO patologia;
+    // Nuevo campo para incluir los tratamientos
+    private List<TratamientoDTO> tratamientos;
 
     public AtencionResponseDTO(Atencion a) {
         this.id = a.getId();
@@ -29,7 +34,30 @@ public class AtencionResponseDTO {
                     p.getDescripcion()
             );
         }
+
+        // Convertir los tratamientos a DTOs
+        if (a.getTratamientos() != null && !a.getTratamientos().isEmpty()) {
+            this.tratamientos = a.getTratamientos().stream()
+                .filter(t -> t.getActivo() != null && t.getActivo())
+                .map(this::convertTratamientoToDTO)
+                .collect(Collectors.toList());
+        }
     }
+
+
+    private TratamientoDTO convertTratamientoToDTO(Tratamiento tratamiento) {
+        TratamientoDTO dto = new TratamientoDTO();
+        dto.setId(tratamiento.getId());
+        dto.setNombre(tratamiento.getNombre());
+        dto.setDescripcion(tratamiento.getDescripcion());
+        dto.setDuracionDias(tratamiento.getDuracionDias());
+        dto.setFechaInicio(tratamiento.getFechaInicio());
+        dto.setFechaFin(tratamiento.getFechaFin());
+        dto.setAtencionId(tratamiento.getAtencion() != null ? tratamiento.getAtencion().getId() : null);
+        dto.setActivo(tratamiento.getActivo());
+        return dto;
+    }
+
     // getters y setters...
 
 
@@ -87,5 +115,13 @@ public class AtencionResponseDTO {
 
     public void setPatologia(PatologiaResponseDTO patologia) {
         this.patologia = patologia;
+    }
+
+    public List<TratamientoDTO> getTratamientos() {
+        return tratamientos;
+    }
+
+    public void setTratamientos(List<TratamientoDTO> tratamientos) {
+        this.tratamientos = tratamientos;
     }
 }

@@ -1,5 +1,8 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AtencionRegisterDTO {
     private Long citaId;
 
@@ -9,6 +12,9 @@ public class AtencionRegisterDTO {
     private String observaciones;
 
     private Long patologiaId;
+
+    // Nuevo campo para permitir la creación de tratamientos al registrar una atención
+    private List<TratamientoDTO> tratamientos = new ArrayList<>();
 
     // Getters y setters
     public Long getCitaId() {
@@ -57,5 +63,13 @@ public class AtencionRegisterDTO {
 
     public void setPatologiaId(Long patologiaId) {
         this.patologiaId = patologiaId;
+    }
+
+    public List<TratamientoDTO> getTratamientos() {
+        return tratamientos;
+    }
+
+    public void setTratamientos(List<TratamientoDTO> tratamientos) {
+        this.tratamientos = tratamientos;
     }
 }
