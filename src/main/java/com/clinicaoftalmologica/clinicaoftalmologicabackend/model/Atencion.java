@@ -3,6 +3,8 @@ package com.clinicaoftalmologica.clinicaoftalmologicabackend.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Atencion {
@@ -20,8 +22,13 @@ public class Atencion {
     private String motivo;
     private String diagnostico;
 
+    // Mantenemos el campo tratamiento para compatibilidad, pero será depreciado
     @Column(length = 1000)
     private String tratamiento;
+
+    // Nueva relación con la entidad Tratamiento
+    @OneToMany(mappedBy = "atencion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Tratamiento> tratamientos = new HashSet<>();
 
     @Column(length = 1000)
     private String observaciones;
@@ -29,6 +36,17 @@ public class Atencion {
     @ManyToOne(optional = true)
     @JoinColumn(name = "patologia_id")
     private Patologia patologia;
+
+    // Métodos helper para manejar la relación con tratamientos
+    public void addTratamiento(Tratamiento tratamiento) {
+        tratamientos.add(tratamiento);
+        tratamiento.setAtencion(this);
+    }
+
+    public void removeTratamiento(Tratamiento tratamiento) {
+        tratamientos.remove(tratamiento);
+        tratamiento.setAtencion(null);
+    }
 
     // Getters y setters
     public Long getId() {
@@ -75,6 +93,14 @@ public class Atencion {
         this.tratamiento = tratamiento;
     }
 
+    public Set<Tratamiento> getTratamientos() {
+        return tratamientos;
+    }
+
+    public void setTratamientos(Set<Tratamiento> tratamientos) {
+        this.tratamientos = tratamientos;
+    }
+
     public String getObservaciones() {
         return observaciones;
     }
@@ -91,4 +117,3 @@ public class Atencion {
         this.patologia = patologia;
     }
 }
-
