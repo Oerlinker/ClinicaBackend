@@ -1,14 +1,17 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.dto;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Cita;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class HistorialClinicoDTO {
-    private List<AntecedenteResponseDTO> antecedentes;
-    private List<AtencionResponseDTO> atenciones;
-    private List<Cita> citas;
-    private Set<DoctorDTO> medicosVisitados;
+    private List<AntecedenteResponseDTO> antecedentes = new ArrayList<>();
+    private List<AtencionResponseDTO>   atenciones   = new ArrayList<>();
+    private List<Cita>                  citas        = new ArrayList<>();
+    private Set<DoctorDTO>              medicosVisitados = new HashSet<>();
 
     public List<AntecedenteResponseDTO> getAntecedentes() {
         return antecedentes;
