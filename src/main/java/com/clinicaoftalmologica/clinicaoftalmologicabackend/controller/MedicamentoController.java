@@ -19,19 +19,19 @@ public class MedicamentoController {
     private MedicamentoService medicamentoService;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR', 'ADMIN')")
     public ResponseEntity<List<MedicamentoDTO>> getAllMedicamentos() {
         return ResponseEntity.ok(medicamentoService.getAllMedicamentos());
     }
 
     @GetMapping("/buscar")
-    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR', 'ADMIN')")
     public ResponseEntity<List<MedicamentoDTO>> searchMedicamentos(@RequestParam String nombre) {
         return ResponseEntity.ok(medicamentoService.searchMedicamentosByNombre(nombre));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR', 'ADMIN')")
     public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
         return medicamentoService.getMedicamentoById(id)
                 .map(ResponseEntity::ok)
