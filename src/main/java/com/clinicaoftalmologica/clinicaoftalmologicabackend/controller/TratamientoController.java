@@ -88,7 +88,7 @@ public class TratamientoController {
 
     // Endpoint para asociar un medicamento a un tratamiento (crear una dosis)
     @PostMapping("/{id}/medicamentos")
-    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR', 'ADMIN')")
     public ResponseEntity<?> asociarMedicamentoATratamiento(
             @PathVariable Long id,
             @RequestBody MedicamentoTratamientoDTO medicamentoTratamientoDTO) {
