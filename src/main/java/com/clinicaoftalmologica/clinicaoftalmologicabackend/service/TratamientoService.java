@@ -57,7 +57,7 @@ public class TratamientoService {
 
     @Transactional
     public TratamientoDTO createTratamiento(TratamientoDTO tratamientoDTO) throws Exception {
-        // Verificar que la atención existe
+
         Atencion atencion = atencionRepository.findById(tratamientoDTO.getAtencionId())
                 .orElseThrow(() -> new Exception("Atención no encontrada con ID: " + tratamientoDTO.getAtencionId()));
 

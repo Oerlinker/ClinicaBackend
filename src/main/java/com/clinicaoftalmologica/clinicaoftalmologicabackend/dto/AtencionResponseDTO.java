@@ -12,7 +12,6 @@ public class AtencionResponseDTO {
     private LocalDate fecha;
     private String motivo;
     private String diagnostico;
-    private String tratamiento;
     private String observaciones;
     private PatologiaResponseDTO patologia;
     // Nuevo campo para incluir los tratamientos
@@ -23,7 +22,6 @@ public class AtencionResponseDTO {
         this.fecha = a.getFecha();
         this.motivo = a.getMotivo();
         this.diagnostico = a.getDiagnostico();
-        this.tratamiento = a.getTratamiento();
         this.observaciones = a.getObservaciones();
         if (a.getPatologia() != null) {
             var p = a.getPatologia();
@@ -91,14 +89,6 @@ public class AtencionResponseDTO {
 
     public void setDiagnostico(String diagnostico) {
         this.diagnostico = diagnostico;
-    }
-
-    public String getTratamiento() {
-        return tratamiento;
-    }
-
-    public void setTratamiento(String tratamiento) {
-        this.tratamiento = tratamiento;
     }
 
     public String getObservaciones() {

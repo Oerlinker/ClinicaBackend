@@ -86,28 +86,30 @@ public class TratamientoController {
         }
     }
 
-    @PostMapping("/{tratamientoId}/medicamentos")
+    // Endpoint para asociar un medicamento a un tratamiento (crear una dosis)
+    @PostMapping("/{id}/medicamentos")
     @PreAuthorize("hasRole('MEDICO')")
     public ResponseEntity<?> asociarMedicamentoATratamiento(
-            @PathVariable Long tratamientoId,
+            @PathVariable Long id,
             @RequestBody MedicamentoTratamientoDTO medicamentoTratamientoDTO) {
         try {
             MedicamentoTratamientoDTO result =
-                tratamientoService.asociarMedicamentoATratamiento(tratamientoId, medicamentoTratamientoDTO);
+                tratamientoService.asociarMedicamentoATratamiento(id, medicamentoTratamientoDTO);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    @DeleteMapping("/{tratamientoId}/medicamentos/{medicamentoTratamientoId}")
+    // Endpoint para eliminar la asociación entre un medicamento y un tratamiento (eliminar una dosis)
+    @DeleteMapping("/{id}/medicamentos/{mtId}")
     @PreAuthorize("hasRole('MEDICO')")
     public ResponseEntity<?> eliminarMedicamentoDeTratamiento(
-            @PathVariable Long tratamientoId,
-            @PathVariable Long medicamentoTratamientoId) {
+            @PathVariable Long id,
+            @PathVariable Long mtId) {
         try {
-            boolean deleted = tratamientoService.eliminarMedicamentoDeTratamiento(tratamientoId, medicamentoTratamientoId);
-            if (deleted) {
+            boolean eliminado = tratamientoService.eliminarMedicamentoDeTratamiento(id, mtId);
+            if (eliminado) {
                 return ResponseEntity.ok(Map.of("eliminado", true));
             } else {
                 return ResponseEntity.notFound().build();

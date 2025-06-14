@@ -8,7 +8,6 @@ public class AtencionRegisterDTO {
 
     private String motivo;
     private String diagnostico;
-    private String tratamiento;
     private String observaciones;
 
     private Long patologiaId;
@@ -39,14 +38,6 @@ public class AtencionRegisterDTO {
 
     public void setDiagnostico(String diagnostico) {
         this.diagnostico = diagnostico;
-    }
-
-    public String getTratamiento() {
-        return tratamiento;
-    }
-
-    public void setTratamiento(String tratamiento) {
-        this.tratamiento = tratamiento;
     }
 
     public String getObservaciones() {

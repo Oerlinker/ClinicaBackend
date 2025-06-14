@@ -1,6 +1,7 @@
 package com.clinicaoftalmologica.clinicaoftalmologicabackend.controller;
 
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionRegisterDTO;
+import com.clinicaoftalmologica.clinicaoftalmologicabackend.dto.AtencionResponseDTO;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.service.AtencionService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,10 @@ public class AtencionController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('DOCTOR')")
-    public ResponseEntity<Atencion> registrar(@RequestBody AtencionRegisterDTO dto) {
+    public ResponseEntity<AtencionResponseDTO> registrar(@RequestBody AtencionRegisterDTO dto) {
         Atencion atencion = atencionService.registrar(dto);
-        return ResponseEntity.ok(atencion);
+        // Convertir la entidad a DTO antes de devolverla
+        AtencionResponseDTO responseDTO = new AtencionResponseDTO(atencion);
+        return ResponseEntity.ok(responseDTO);
     }
 }

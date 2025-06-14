@@ -22,10 +22,6 @@ public class Atencion {
     private String motivo;
     private String diagnostico;
 
-    // Mantenemos el campo tratamiento para compatibilidad, pero será depreciado
-    @Column(length = 1000)
-    private String tratamiento;
-
     // Nueva relación con la entidad Tratamiento
     @OneToMany(mappedBy = "atencion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Tratamiento> tratamientos = new HashSet<>();
@@ -83,14 +79,6 @@ public class Atencion {
 
     public void setDiagnostico(String diagnostico) {
         this.diagnostico = diagnostico;
-    }
-
-    public String getTratamiento() {
-        return tratamiento;
-    }
-
-    public void setTratamiento(String tratamiento) {
-        this.tratamiento = tratamiento;
     }
 
     public Set<Tratamiento> getTratamientos() {

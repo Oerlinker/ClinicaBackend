@@ -39,7 +39,6 @@ public class AtencionService {
         atencion.setFecha(LocalDate.now());
         atencion.setMotivo(dto.getMotivo());
         atencion.setDiagnostico(dto.getDiagnostico());
-        atencion.setTratamiento(dto.getTratamiento());
         atencion.setObservaciones(dto.getObservaciones());
 
         if (dto.getPatologiaId() != null) {
