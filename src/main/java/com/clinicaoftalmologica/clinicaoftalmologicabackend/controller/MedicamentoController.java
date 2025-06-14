@@ -19,19 +19,19 @@ public class MedicamentoController {
     private MedicamentoService medicamentoService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
     public ResponseEntity<List<MedicamentoDTO>> getAllMedicamentos() {
         return ResponseEntity.ok(medicamentoService.getAllMedicamentos());
     }
 
     @GetMapping("/buscar")
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
     public ResponseEntity<List<MedicamentoDTO>> searchMedicamentos(@RequestParam String nombre) {
         return ResponseEntity.ok(medicamentoService.searchMedicamentosByNombre(nombre));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
     public ResponseEntity<MedicamentoDTO> getMedicamentoById(@PathVariable Long id) {
         return medicamentoService.getMedicamentoById(id)
                 .map(ResponseEntity::ok)
@@ -39,13 +39,13 @@ public class MedicamentoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MedicamentoDTO> createMedicamento(@RequestBody MedicamentoDTO medicamentoDTO) {
         return new ResponseEntity<>(medicamentoService.createMedicamento(medicamentoDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MedicamentoDTO> updateMedicamento(
             @PathVariable Long id,
             @RequestBody MedicamentoDTO medicamentoDTO) {
@@ -55,7 +55,7 @@ public class MedicamentoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Map<String, Boolean>> deleteMedicamento(@PathVariable Long id) {
         boolean deleted = medicamentoService.deleteMedicamento(id);
         if (deleted) {

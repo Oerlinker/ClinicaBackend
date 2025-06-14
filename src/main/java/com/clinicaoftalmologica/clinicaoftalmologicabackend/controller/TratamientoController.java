@@ -20,19 +20,19 @@ public class TratamientoController {
     private TratamientoService tratamientoService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN')")
     public ResponseEntity<List<TratamientoDTO>> getAllTratamientos() {
         return ResponseEntity.ok(tratamientoService.getAllTratamientos());
     }
 
     @GetMapping("/atencion/{atencionId}")
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN', 'PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN', 'PACIENTE')")
     public ResponseEntity<List<TratamientoDTO>> getTratamientosByAtencion(@PathVariable Long atencionId) {
         return ResponseEntity.ok(tratamientoService.getTratamientosByAtencion(atencionId));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN', 'PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN', 'PACIENTE')")
     public ResponseEntity<TratamientoDTO> getTratamientoById(@PathVariable Long id) {
         return tratamientoService.getTratamientoById(id)
                 .map(ResponseEntity::ok)
@@ -40,7 +40,7 @@ public class TratamientoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('MEDICO')")
+    @PreAuthorize("hasAuthority('MEDICO')")
     public ResponseEntity<?> createTratamiento(@RequestBody TratamientoDTO tratamientoDTO) {
         try {
             return new ResponseEntity<>(tratamientoService.createTratamiento(tratamientoDTO), HttpStatus.CREATED);
@@ -50,7 +50,7 @@ public class TratamientoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('MEDICO')")
+    @PreAuthorize("hasAuthority('MEDICO')")
     public ResponseEntity<?> updateTratamiento(
             @PathVariable Long id,
             @RequestBody TratamientoDTO tratamientoDTO) {
@@ -64,7 +64,7 @@ public class TratamientoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MEDICO')")
+    @PreAuthorize("hasAuthority('MEDICO')")
     public ResponseEntity<Map<String, Boolean>> deleteTratamiento(@PathVariable Long id) {
         boolean deleted = tratamientoService.deleteTratamiento(id);
         if (deleted) {
@@ -76,7 +76,7 @@ public class TratamientoController {
 
     // Endpoints para gestionar los medicamentos de un tratamiento
     @GetMapping("/{tratamientoId}/medicamentos")
-    @PreAuthorize("hasAnyRole('MEDICO', 'ADMIN', 'PACIENTE')")
+    @PreAuthorize("hasAnyAuthority('MEDICO', 'ADMIN', 'PACIENTE')")
     public ResponseEntity<?> getMedicamentosByTratamiento(@PathVariable Long tratamientoId) {
         try {
             List<MedicamentoTratamientoDTO> medicamentos = tratamientoService.getMedicamentosByTratamiento(tratamientoId);
@@ -88,7 +88,7 @@ public class TratamientoController {
 
     // Endpoint para asociar un medicamento a un tratamiento (crear una dosis)
     @PostMapping("/{id}/medicamentos")
-    @PreAuthorize("hasRole('MEDICO')")
+    @PreAuthorize("hasAuthority('MEDICO')")
     public ResponseEntity<?> asociarMedicamentoATratamiento(
             @PathVariable Long id,
             @RequestBody MedicamentoTratamientoDTO medicamentoTratamientoDTO) {
@@ -103,7 +103,7 @@ public class TratamientoController {
 
     // Endpoint para eliminar la asociación entre un medicamento y un tratamiento (eliminar una dosis)
     @DeleteMapping("/{id}/medicamentos/{mtId}")
-    @PreAuthorize("hasRole('MEDICO')")
+    @PreAuthorize("hasAuthority('MEDICO')")
     public ResponseEntity<?> eliminarMedicamentoDeTratamiento(
             @PathVariable Long id,
             @PathVariable Long mtId) {

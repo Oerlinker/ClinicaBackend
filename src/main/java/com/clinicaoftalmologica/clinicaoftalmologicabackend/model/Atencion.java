@@ -22,7 +22,6 @@ public class Atencion {
     private String motivo;
     private String diagnostico;
 
-    // Nueva relación con la entidad Tratamiento
     @OneToMany(mappedBy = "atencion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Tratamiento> tratamientos = new HashSet<>();
 
@@ -33,7 +32,7 @@ public class Atencion {
     @JoinColumn(name = "patologia_id")
     private Patologia patologia;
 
-    // Métodos helper para manejar la relación con tratamientos
+
     public void addTratamiento(Tratamiento tratamiento) {
         tratamientos.add(tratamiento);
         tratamiento.setAtencion(this);
