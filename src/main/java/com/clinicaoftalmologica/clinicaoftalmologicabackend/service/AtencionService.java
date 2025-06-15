@@ -79,4 +79,20 @@ public class AtencionService {
                 .map(AtencionResponseDTO::new)
                 .collect(Collectors.toList());
     }
+
+    public List<AtencionResponseDTO> filtrar(Long pacienteId, Long doctorId) {
+        List<Atencion> raws;
+        if (pacienteId != null && doctorId != null) {
+            raws = atencionRepository.findByCitaPacienteIdAndCitaDoctorId(pacienteId, doctorId);
+        } else if (pacienteId != null) {
+            raws = atencionRepository.findByCitaPacienteId(pacienteId);
+        } else if (doctorId != null) {
+            raws = atencionRepository.findByCitaDoctorId(doctorId);
+        } else {
+            raws = atencionRepository.findAll();
+        }
+        return raws.stream()
+                .map(AtencionResponseDTO::new)
+                .collect(Collectors.toList());
+    }
 }

@@ -12,4 +12,6 @@ public interface AtencionRepository extends JpaRepository<Atencion, Long> {
 
     Optional<Atencion> findByCita_Id(Long citaId);
     List<Atencion> findByCitaPacienteId(Long pacienteId);
+    List<Atencion> findByCitaDoctorId(Long doctorId);
+    List<Atencion> findByCitaPacienteIdAndCitaDoctorId(Long pacienteId, Long doctorId);
 }

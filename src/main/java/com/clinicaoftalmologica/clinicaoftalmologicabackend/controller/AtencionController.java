@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/atenciones")
@@ -31,6 +32,17 @@ public class AtencionController {
     @PreAuthorize("hasAnyAuthority('DOCTOR','ADMIN','PACIENTE')")
     public ResponseEntity<List<AtencionResponseDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
         List<AtencionResponseDTO> list = atencionService.listarPorUsuario(usuarioId);
+        return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("/paciente/{pacienteId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<AtencionResponseDTO>> listarPorPacienteYFiltros(
+            @PathVariable Long pacienteId,
+            @RequestBody(required = false) Map<String, Long> filtros
+    ) {
+        Long doctorId = filtros != null ? filtros.get("doctorId") : null;
+        List<AtencionResponseDTO> list = atencionService.filtrar(pacienteId, doctorId);
         return ResponseEntity.ok(list);
     }
 }
