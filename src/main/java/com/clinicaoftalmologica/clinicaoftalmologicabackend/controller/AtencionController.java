@@ -45,4 +45,11 @@ public class AtencionController {
         List<AtencionResponseDTO> list = atencionService.filtrar(pacienteId, doctorId);
         return ResponseEntity.ok(list);
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN','DOCTOR','SECRETARIA')")
+    public ResponseEntity<AtencionResponseDTO> detalle(@PathVariable Long id) {
+        AtencionResponseDTO dto = atencionService.obtenerPorId(id);
+        return ResponseEntity.ok(dto);
+    }
 }

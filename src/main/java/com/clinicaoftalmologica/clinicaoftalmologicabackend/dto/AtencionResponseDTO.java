@@ -14,7 +14,6 @@ public class AtencionResponseDTO {
     private String diagnostico;
     private String observaciones;
     private PatologiaResponseDTO patologia;
-    // Nuevo campo para incluir los tratamientos
     private List<TratamientoDTO> tratamientos;
 
     public AtencionResponseDTO(Atencion a) {

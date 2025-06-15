@@ -95,4 +95,12 @@ public class AtencionService {
                 .map(AtencionResponseDTO::new)
                 .collect(Collectors.toList());
     }
+
+    public AtencionResponseDTO obtenerPorId(Long id) {
+        Atencion at = atencionRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Atención no encontrada")
+                );
+        return new AtencionResponseDTO(at);
+    }
 }
