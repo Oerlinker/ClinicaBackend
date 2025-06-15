@@ -4,6 +4,7 @@ import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Atencion;
 import com.clinicaoftalmologica.clinicaoftalmologicabackend.model.Tratamiento;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,12 +17,35 @@ public class AtencionResponseDTO {
     private PatologiaResponseDTO patologia;
     private List<TratamientoDTO> tratamientos;
 
+    // Nuevos campos para mostrar información de paciente y doctor
+    private Long pacienteId;
+    private String pacienteNombre;
+    private Long doctorId;
+    private String doctorNombre;
+
     public AtencionResponseDTO(Atencion a) {
         this.id = a.getId();
         this.fecha = a.getFecha();
         this.motivo = a.getMotivo();
         this.diagnostico = a.getDiagnostico();
         this.observaciones = a.getObservaciones();
+
+        // Obtener datos del paciente
+        if (a.getCita() != null && a.getCita().getPaciente() != null) {
+            var paciente = a.getCita().getPaciente();
+            this.pacienteId = paciente.getId();
+            this.pacienteNombre = paciente.getNombre() + " " + paciente.getApellido();
+        }
+
+        // Obtener datos del doctor
+        if (a.getCita() != null && a.getCita().getDoctor() != null) {
+            var doctor = a.getCita().getDoctor();
+            this.doctorId = doctor.getId();
+            if (doctor.getUsuario() != null) {
+                this.doctorNombre = doctor.getUsuario().getNombre() + " " + doctor.getUsuario().getApellido();
+            }
+        }
+
         if (a.getPatologia() != null) {
             var p = a.getPatologia();
             this.patologia = new PatologiaResponseDTO(
@@ -38,6 +62,9 @@ public class AtencionResponseDTO {
                 .filter(t -> t.getActivo() != null && t.getActivo())
                 .map(this::convertTratamientoToDTO)
                 .collect(Collectors.toList());
+        } else {
+            // Inicializar como lista vacía para evitar problemas de null
+            this.tratamientos = new ArrayList<>();
         }
     }
 
@@ -52,6 +79,7 @@ public class AtencionResponseDTO {
         dto.setFechaFin(tratamiento.getFechaFin());
         dto.setAtencionId(tratamiento.getAtencion() != null ? tratamiento.getAtencion().getId() : null);
         dto.setActivo(tratamiento.getActivo());
+
         return dto;
     }
 
@@ -112,5 +140,38 @@ public class AtencionResponseDTO {
 
     public void setTratamientos(List<TratamientoDTO> tratamientos) {
         this.tratamientos = tratamientos;
+    }
+
+    // Getters y setters para los nuevos campos
+    public Long getPacienteId() {
+        return pacienteId;
+    }
+
+    public void setPacienteId(Long pacienteId) {
+        this.pacienteId = pacienteId;
+    }
+
+    public String getPacienteNombre() {
+        return pacienteNombre;
+    }
+
+    public void setPacienteNombre(String pacienteNombre) {
+        this.pacienteNombre = pacienteNombre;
+    }
+
+    public Long getDoctorId() {
+        return doctorId;
+    }
+
+    public void setDoctorId(Long doctorId) {
+        this.doctorId = doctorId;
+    }
+
+    public String getDoctorNombre() {
+        return doctorNombre;
+    }
+
+    public void setDoctorNombre(String doctorNombre) {
+        this.doctorNombre = doctorNombre;
     }
 }
