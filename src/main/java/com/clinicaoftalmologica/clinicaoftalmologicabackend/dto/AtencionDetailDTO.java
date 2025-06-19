@@ -26,7 +26,8 @@ public class AtencionDetailDTO {
         this.fecha = atencion.getFecha();
         this.motivo = atencion.getMotivo();
         this.diagnostico = atencion.getDiagnostico();
-        this.tratamiento = atencion.getTratamiento();
+        this.tratamiento = atencion.getTratamientos().isEmpty() ? "" :
+                            "Ver detalle de tratamientos";
         this.observaciones = atencion.getObservaciones();
 
         if (atencion.getPatologia() != null) {
