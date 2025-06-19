@@ -103,7 +103,7 @@ public class TratamientoController {
 
     // Endpoint para eliminar la asociación entre un medicamento y un tratamiento (eliminar una dosis)
     @DeleteMapping("/{id}/medicamentos/{mtId}")
-    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR', 'ADMIN')")
     public ResponseEntity<?> eliminarMedicamentoDeTratamiento(
             @PathVariable Long id,
             @PathVariable Long mtId) {
