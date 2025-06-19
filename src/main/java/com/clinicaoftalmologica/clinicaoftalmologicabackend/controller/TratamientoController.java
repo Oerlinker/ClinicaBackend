@@ -50,7 +50,7 @@ public class TratamientoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR','ADMIN')")
     public ResponseEntity<?> updateTratamiento(
             @PathVariable Long id,
             @RequestBody TratamientoDTO tratamientoDTO) {
@@ -64,7 +64,7 @@ public class TratamientoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('DOCTOR','ADMIN')")
     public ResponseEntity<Map<String, Boolean>> deleteTratamiento(@PathVariable Long id) {
         boolean deleted = tratamientoService.deleteTratamiento(id);
         if (deleted) {
